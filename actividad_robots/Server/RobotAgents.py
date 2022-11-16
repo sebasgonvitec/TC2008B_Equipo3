@@ -28,7 +28,7 @@ class RandomAgent(Agent):
             model: Model reference for the agent
         """
         super().__init__(unique_id, model)
-        self.direction = 4
+        self.direction = 1
 
     def move(self):
         """ 

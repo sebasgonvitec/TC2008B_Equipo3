@@ -431,7 +431,7 @@ MonoBehaviour:
   agentPrefab: {fileID: 993549348249905, guid: e6eae54342629d24296667a118f16e0a, type: 3}
   obstaclePrefab: {fileID: 961990229689801968, guid: 6c235879a85b1094fb7f4eb1cbf456a5, type: 3}
   floor: {fileID: 485002090}
-  NAgents: 100
+  NAgents: 50
   width: 28
   height: 28
   timeToUpdate: 2
