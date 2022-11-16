@@ -36,7 +36,7 @@ class RandomAgent(Agent):
         """
         possible_steps = self.model.grid.get_neighborhood(
             self.pos,
-            moore=True, # Boolean for whether to use Moore neighborhood (including diagonals) or Von Neumann (only up/down/left/right).
+            moore=False, # Boolean for whether to use Moore neighborhood (including diagonals) or Von Neumann (only up/down/left/right).
             include_center=True) 
         
         # Checks which grid cells are empty
@@ -53,7 +53,7 @@ class RandomAgent(Agent):
         """ 
         Determines the new direction it will take, and then moves
         """
-        self.direction = self.random.randint(0,8)
+        self.direction = self.random.randint(0,4)
         print(f"Agente: {self.unique_id} movimiento {self.direction}")
         self.move()
 
@@ -67,6 +67,31 @@ class ObstacleAgent(Agent):
     def step(self):
         pass   
 
+class BoxAgent(Agent):
+    """
+    Obstacle agent. Just to add obstacles to the grid.
+    """
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+
+    def step(self):
+        pass   
+
+class StationAgent(Agent):
+    """
+    Obstacle agent. Just to add obstacles to the grid.
+    """
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+        self.full=False
+
+    def step(self):
+        pass   
+
+
+
+#########################################################################################################################################
+
 class RandomModel(Model):
     """ 
     Creates a new model with random agents.
@@ -74,19 +99,79 @@ class RandomModel(Model):
         N: Number of agents in the simulation
         height, width: The size of the grid to model
     """
-    def __init__(self, N, width, height):
+    def __init__(self, N, width, height, box_num):
         self.num_agents = N
         self.grid = Grid(width,height,torus = False) 
         self.schedule = RandomActivation(self)
         self.running = True 
+        self.station_num = box_num // 5
+
+        #Calculate Number of Stations
+        if(box_num % 5 != 0):
+            self.station_num+=1
 
         # Creates the border of the grid
         border = [(x,y) for y in range(height) for x in range(width) if y in [0, height-1] or x in [0, width - 1]]
 
+        # Create station border range
+        station_border = [(x,y) for y in range(1, height-1) for x in range(1, width-1) if y in [1, height-2] or x in [1, width-2]]
+
+        # Build Border
         for pos in border:
             obs = ObstacleAgent(pos, self)
             self.schedule.add(obs)
             self.grid.place_agent(obs, pos)
+
+        # Place Stations
+        sides = [0, 0, 0, 0]
+        indx = 0
+
+        #Determine number of stations per side
+        for i in range(self.station_num):
+            if(indx<=3):
+                sides[indx]+=1
+                indx+=1
+            else:
+                indx=0
+                sides[indx]+=1
+                indx+=1
+        #Determine coords for each side
+        station_coords = []
+        y_up = False
+        x_left = False
+        y=1
+        x=1
+
+        #Iterate over every side
+        for i in range(len(sides)):
+            #For horizontal sides
+            if(i < 2):
+                if(y_up):
+                    y = self.grid.height-2
+                div = self.grid.width // sides[i] 
+                res = div // 2
+                for j in range(sides[i]):
+                    station_coords.append((res, y))
+                    y_up=True
+                    res+=div
+
+            #For vertical sides
+            if(i >= 2):
+                if(x_left):
+                    x = self.grid.width-2
+                div = self.grid.height // sides[i] 
+                res = div // 2
+                for j in range(sides[i]):
+                    station_coords.append((x, res))
+                    x_left=True
+                    res+=div
+
+        #Instanciate Station Agent
+        for pos in station_coords:
+            station = StationAgent(pos, self)
+            self.schedule.add(station)
+            self.grid.place_agent(station, pos)
+
 
         # Add the agent to a random empty grid cell
         for i in range(self.num_agents):
