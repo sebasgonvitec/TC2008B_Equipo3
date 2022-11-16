@@ -13,7 +13,7 @@ from mesa import Agent, Model
 from mesa.time import RandomActivation
 from mesa.space import Grid
 
-class RandomAgent(Agent):
+class RobotAgent(Agent):
     """
     Agent that moves randomly.
     Attributes:
@@ -67,6 +67,22 @@ class ObstacleAgent(Agent):
     def step(self):
         pass   
 
+class BoxAgent(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+
+    def step(self):
+        #añadir move_with_robot
+        pass   
+
+class StationAgent(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+        self.num_boxes = 0
+    
+    def step(self): 
+        pass
+
 class RandomModel(Model):
     """ 
     Creates a new model with random agents.
@@ -90,7 +106,7 @@ class RandomModel(Model):
 
         # Add the agent to a random empty grid cell
         for i in range(self.num_agents):
-            a = RandomAgent(i+1000, self) 
+            a = RobotAgent(i+1000, self) 
             self.schedule.add(a)
 
             pos_gen = lambda w, h: (self.random.randrange(w), self.random.randrange(h))
