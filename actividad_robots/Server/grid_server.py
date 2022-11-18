@@ -34,9 +34,11 @@ user_height = int(input("Enter height of the grid: "))
 
 model_params = {
     "N":UserSettableParameter("slider", "Robot Num", 5, 1, 50, 1), 
-    "box_num": UserSettableParameter("slider", "Box Num", 10, 1, 50, 1), 
     "width": user_width,
-    "height": user_height}
+    "height": user_height,
+    "box_num": UserSettableParameter("slider", "Box Num", 20, 1, 50, 1)
+    #"box_num": 30
+    }
 
 grid = CanvasGrid(agent_portrayal, user_width, user_height, 500, 500)
 
