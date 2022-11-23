@@ -11,6 +11,7 @@ Autores: Sebastián González,
 
 from mesa import Agent, Model
 from mesa.time import RandomActivation
+from mesa.datacollection import DataCollector
 from mesa.space import MultiGrid
 
 # TODO: Ir a la estación después de agarrar una caja
@@ -36,6 +37,8 @@ class RobotAgent(Agent):
         self.box = None
         self.unique_id = unique_id
         self.last_move = None
+        self.steps_taken = 0
+        self.grabbed_boxes = 0
 
     def move(self):
         """ 
@@ -76,8 +79,13 @@ class RobotAgent(Agent):
                 next_move = self.pos
                 self.carry_box = False
                 self.box.inStation = True
-
-        self.model.grid.move_agent(self, next_move) 
+                self.grabbed_boxes+=1
+                self.model.picked_boxes+=1
+        
+        if(next_move != self.pos):
+            self.model.grid.move_agent(self, next_move) 
+            self.steps_taken+=1
+            
 
     def find_closest_station(self):
         """
@@ -245,6 +253,14 @@ class RandomModel(Model):
         self.running = True 
         self.box_num = box_num
         self.station_num = box_num // 5
+        self.steps = 0
+        self.picked_boxes = 0
+       
+
+        self.datacollector = DataCollector( 
+        model_reporters={"Global Steps": lambda m: self.steps},
+        agent_reporters={"Steps": lambda a: a.steps_taken if isinstance(a, RobotAgent) else 0, "Grabbed Boxes": lambda b: b.grabbed_boxes if isinstance(b, RobotAgent) else 0})
+        
 
         #Calculate Number of Stations
         if(box_num % 5 != 0):
@@ -335,4 +351,26 @@ class RandomModel(Model):
 
     def step(self):
         '''Advance the model by one step.'''
+
+        #Evaluate if all the boxes have been placed in a station
+        if(self.picked_boxes == self.box_num):
+            
+            #Print Robot data
+            count = 1
+            for cell in self.grid.coord_iter():
+                cell_content, x, y = cell
+                for agent in cell_content:
+                    if isinstance(agent, RobotAgent):
+                        print("Robot ", count)
+                        print("Steps: ", agent.steps_taken)
+                        print("Grabbed Boxes", agent.grabbed_boxes)
+                        print("\n")
+                        count+=1
+            
+            #Print Time/Global Steps
+            print("Time/Global Steps: ", self.steps)
+
+            self.running = False #stop the program
+                        
         self.schedule.step()
+        self.steps+=1
