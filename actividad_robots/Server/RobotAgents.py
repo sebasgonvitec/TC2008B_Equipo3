@@ -81,16 +81,20 @@ class RobotAgent(Agent):
                 # move towards box
                 next_move = neighbor.pos
         
-        # 
+        # If the robot is carrying box
         if(self.carry_box):
             print("Closest station: ", self.find_closest_station())
+            # Define its closest station
             station = self.find_closest_station() 
+            # Determine cell to move to (cell that implies the min distance to station)
             next_move= self.move_to_cell(station)
+            # Move box to next position
             self.box.model.grid.move_agent(self.box, next_move)
-            print(next_move)
+            # If the next move coords are the same as station coords
             if(next_move == station):
-                #self.box.model.grid.move_agent(self.box, next_move)
+                #Keep agent in its current position 
                 next_move = self.pos
+                # stop carrying box
                 self.carry_box = False
                 self.box.inStation = True
                 self.grabbed_boxes+=1
