@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Networking;
 
 [Serializable]
@@ -94,8 +95,10 @@ public class AgentController : MonoBehaviour
     bool updated = false, started = false, finished = false;
 
     public GameObject agentPrefab, obstaclePrefab, floor, stationPrefab, boxPrefab;
+    public GameObject timerText;
     public int NAgents, width, height, box_num;
     public float timeToUpdate = 5.0f;
+    public float timeElapsed = 0;
     private float timer, dt;
 
     void Start()
@@ -131,14 +134,15 @@ public class AgentController : MonoBehaviour
         {
             if (finished)
             {
-                Debug.Log("Finished!!");
                 StartCoroutine(GetRobotsData());
-                //enabled = false;
             }
             else
             {
+                timeElapsed += Time.deltaTime;
                 timer -= Time.deltaTime;
                 dt = 1.0f - (timer / timeToUpdate);
+
+                timerText.GetComponent<Text>().text = "Time Elapsed: " + Math.Round(timeElapsed, 2).ToString() + " s";
 
                 foreach (var agent in currPositions)
                 {
@@ -170,7 +174,7 @@ public class AgentController : MonoBehaviour
         {
             modelData = JsonUtility.FromJson<ModelData>(www.downloadHandler.text);
 
-            Debug.Log(modelData.finished);
+            //Debug.Log(modelData.finished);
 
             finished = modelData.finished;
 
@@ -259,7 +263,7 @@ public class AgentController : MonoBehaviour
        
                 if (!started)
                 {
-                    Debug.Log("Box Agent ID: " + agent.id);
+                    //Debug.Log("Box Agent ID: " + agent.id);
                     prevPositions[agent.id] = newAgentPosition;
                     agents[agent.id] = Instantiate(boxPrefab, newAgentPosition, boxPrefab.transform.rotation);
                 }
@@ -268,10 +272,6 @@ public class AgentController : MonoBehaviour
                     if(agent.inStation)
                     {
                         agents[agent.id].SetActive(false);
-                        //Instantiate(twoBoxPrefab, new Vector3(agent.x, agent.y, agent.z), twoBoxPrefab.transform.rotation);
-                        //agents.Remove(agent.id);
-                        //currPositions.Remove(agent.id);
-                        //prevPositions.Remove(agent.id);
                     }
                     else
                     {
@@ -322,7 +322,7 @@ public class AgentController : MonoBehaviour
 
             foreach (AgentData station in stationData.positions)
             {
-                Debug.Log("Num Boxes of Station " + station.id + ": " + station.numBoxes);
+                //Debug.Log("Num Boxes of Station " + station.id + ": " + station.numBoxes);
                 if (station.numBoxes == 0)
                 {
                     Instantiate(stationPrefab, new Vector3(station.x, station.y, station.z), Quaternion.identity);
@@ -348,7 +348,7 @@ public class AgentController : MonoBehaviour
         else
         {
             runData = JsonUtility.FromJson<RunData>(www.downloadHandler.text);
-            Debug.Log(runData.ToString());
+            //Debug.Log(runData.ToString());
 
             foreach (RobotData robotData in runData.data)
             {
