@@ -42,6 +42,7 @@ model_params = {
 
 grid = CanvasGrid(agent_portrayal, user_width, user_height, 500, 500)
 
+
 server = ModularServer(RandomModel, [grid], "Robot Agent", model_params)
 
 server.port = 8521
