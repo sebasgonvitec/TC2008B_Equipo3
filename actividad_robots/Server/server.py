@@ -85,7 +85,7 @@ def getStations():
             if cell_content:
                 for agent in cell_content:
                     if isinstance(agent, StationAgent):
-                        stationPositions.append({"id": str(agent.unique_id), "x": x, "y": 0, "z": z})
+                        stationPositions.append({"id": str(agent.unique_id), "x": x, "y": 0.51, "z": z, "numBoxes": agent.get_num_boxes()})
 
         return jsonify({'positions':stationPositions})
 

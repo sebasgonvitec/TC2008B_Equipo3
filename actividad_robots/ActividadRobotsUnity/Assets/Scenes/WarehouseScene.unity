@@ -154,7 +154,7 @@ Light:
   m_Color: {r: 0.495283, g: 0.92891335, b: 1, a: 1}
   m_Intensity: 12
   m_Range: 15
-  m_SpotAngle: 96.92806
+  m_SpotAngle: 49.922394
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
@@ -248,7 +248,7 @@ Light:
   m_Color: {r: 0.495283, g: 0.92891335, b: 1, a: 1}
   m_Intensity: 12
   m_Range: 15
-  m_SpotAngle: 71.09514
+  m_SpotAngle: 50.263863
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
@@ -427,7 +427,7 @@ Light:
   m_Intensity: 12
   m_Range: 15
   m_SpotAngle: 60.15079
-  m_InnerSpotAngle: 21.80208
+  m_InnerSpotAngle: 1
   m_CookieSize: 10
   m_Shadows:
     m_Type: 0
@@ -518,7 +518,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aca2cd022404af7479be752b793456d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentPrefab: {fileID: 6897385746741766049, guid: 528ff26403eb46947a3d446ed5c268c8, type: 3}
+  agentPrefab: {fileID: 3152113304158344830, guid: 3e240223ec6a6d3468c9a75705a8246b, type: 3}
   obstaclePrefab: {fileID: 2474352897602398234, guid: edc9f3b8cc94aef43a5e8aa36d3a221c, type: 3}
   floor: {fileID: 1824225223}
   stationPrefab: {fileID: 961990229689801968, guid: 65dea3a5917e4ac4db93ec75dab8b95e, type: 3}
@@ -640,7 +640,7 @@ Light:
   m_Color: {r: 0.495283, g: 0.92891335, b: 1, a: 1}
   m_Intensity: 12
   m_Range: 15
-  m_SpotAngle: 60.15079
+  m_SpotAngle: 50.967
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
@@ -734,8 +734,8 @@ Light:
   m_Color: {r: 0.495283, g: 0.92891335, b: 1, a: 1}
   m_Intensity: 12
   m_Range: 15
-  m_SpotAngle: 60.15079
-  m_InnerSpotAngle: 21.80208
+  m_SpotAngle: 46.86192
+  m_InnerSpotAngle: 1
   m_CookieSize: 10
   m_Shadows:
     m_Type: 0
@@ -790,7 +790,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2104591771}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 4.58, y: 13.48, z: 22.87}
+  m_LocalPosition: {x: 4.58, y: 13.55, z: 22.87}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

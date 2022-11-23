@@ -15,6 +15,7 @@ public class AgentData
     public string id;
     public float x, y, z;
     public bool inStation;
+    public int numBoxes;
 
     public AgentData(string id, float x, float y, float z)
     {
@@ -23,6 +24,7 @@ public class AgentData
         this.y = y;
         this.z = z;
         this.inStation = false;
+        this.numBoxes = 0;
     }
 }
 
@@ -69,7 +71,7 @@ public class AgentController : MonoBehaviour
         agents = new Dictionary<string, GameObject>();
 
         floor.transform.localScale = new Vector3((float)width / 10, 1, (float)height / 10);
-        floor.transform.localPosition = new Vector3((float)width / 2 - 0.5f, 0, (float)height / 2 - 0.5f);
+        floor.transform.localPosition = new Vector3((float)width / 2 - 0.5f, 0.5f, (float)height / 2 - 0.5f);
 
         timer = timeToUpdate;
 
@@ -99,7 +101,7 @@ public class AgentController : MonoBehaviour
                 Vector3 direction = currentPosition - interpolated;
 
                 agents[agent.Key].transform.localPosition = interpolated;
-                //if(direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
+                if(direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
             }
 
             // float t = (timer / timeToUpdate);
@@ -118,6 +120,7 @@ public class AgentController : MonoBehaviour
         {
             StartCoroutine(GetAgentsData());
             StartCoroutine(GetBoxData());
+            StartCoroutine(GetStationData());
 
         }
     }
@@ -209,9 +212,10 @@ public class AgentController : MonoBehaviour
                     if(agent.inStation)
                     {
                         agents[agent.id].SetActive(false);
-                        agents.Remove(agent.id);
-                        currPositions.Remove(agent.id);
-                        prevPositions.Remove(agent.id);
+                        //Instantiate(twoBoxPrefab, new Vector3(agent.x, agent.y, agent.z), twoBoxPrefab.transform.rotation);
+                        //agents.Remove(agent.id);
+                        //currPositions.Remove(agent.id);
+                        //prevPositions.Remove(agent.id);
                     }
                     else
                     {
@@ -262,8 +266,18 @@ public class AgentController : MonoBehaviour
 
             foreach (AgentData station in stationData.positions)
             {
-                Instantiate(stationPrefab, new Vector3(station.x, station.y, station.z), Quaternion.identity);
+                Debug.Log("Num Boxes of Station " + station.id + ": " + station.numBoxes);
+                if (station.numBoxes == 0)
+                {
+                    Instantiate(stationPrefab, new Vector3(station.x, station.y, station.z), Quaternion.identity);
+                }
+                else
+                {
+                    Instantiate(boxPrefab, new Vector3(station.x, station.y+(station.numBoxes)-0.5f, station.z), Quaternion.identity);
+                }
+                
             }
         }
     }
+
 }
