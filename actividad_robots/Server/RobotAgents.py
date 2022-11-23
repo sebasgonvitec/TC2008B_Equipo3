@@ -96,83 +96,108 @@ class RobotAgent(Agent):
                 next_move = self.pos
                 # stop carrying box
                 self.carry_box = False
+                # Set box so it indicates it is in station
                 self.box.inStation = True
+                # Count one more box as grabbed
                 self.grabbed_boxes+=1
+                # Count one more as picked boxes
                 self.model.picked_boxes+=1
-        
+        # If next move isn't current position
         if(next_move != self.pos):
+            # move agent
             self.model.grid.move_agent(self, next_move) 
+            # count agent step
             self.steps_taken+=1
             
-
+    # Function to find the coords of the closest station
     def find_closest_station(self):
         """
-        Finds the closest station to the agent. Returns a list of possible stations
+        Finds the closest station to the agent. Returns coordinates of the station
         """
-        # TODO: Hacerlo con list comprehension y scheduler
-        # TODO: Hacerlo igual que método para mover a una celda
         
         stations = [] # list of all existing stations
         closest_station = () # coordinates for the closest station
         
         # Find all Stations and store their coordinates in a list
         for cell in self.model.grid.coord_iter():
+            # Cell information
             cell_contents, x, y, = cell
+            # Iterate through agent in cell contents
             for agent in cell_contents:
+                # if the agent is a station
                 if isinstance(agent, StationAgent):
+                    # if the station contains less than 5 boxes
                     if(agent.get_num_boxes() < 5):
+                        # Add station to list of possible stations
                         stations.append((x, y))
-                        #print("Station number of boxes: ", agent.get_num_boxes())
         
-        #print("stations1: ", stations)
         # Initialize minimum distance with distance from agent to first station in list        
         min_distance = abs(self.pos[0] - stations[0][0]) + abs(self.pos[1] - stations[0][1])
+        # Initialize closest station with first station in list
         closest_station = stations[0]
 
         # Find the coordinates of the closest station from list of stations
         for station in stations:
             print("Self: ", self.pos)
             print("Station: ", station)
+            # Determine the current distance from agent to the station
             current_distance = abs(self.pos[0] - station[0]) + abs(self.pos[1] - station[1])
             print("Current Distance", current_distance)
-            #print("Closest Station: ", closest_station)
+            # if the current distance is smaller than the minimum distance
             if(current_distance <= min_distance):
-                #print("Distance updated")
+                #Set current distance as new minimum distance
                 min_distance = current_distance
+                # Set new closest station
                 closest_station = tuple(station)
                 print("new closest station: ", closest_station)
 
         return closest_station
     
+    # Function that decides which cell to move to given target cell coords
     def move_to_cell(self, cell):
         """
         Method to move agent to a certain cell
         """
+        # Define possible steps
         possible_steps = self.model.grid.get_neighborhood(
-            self.pos,
-            moore=False, # Boolean for whether to use Moore neighborhood (including diagonals) or Von Neumann (only up/down/left/right).
-            include_center=True) 
+            self.pos, # current position
+            moore=False, # Allow Von Neumann movement (only up/down/left/right).
+            include_center=True) # include current position as possible step
         
         # Checks which grid cells are empty
         freeSpaces = list(map(self.model.grid.is_cell_empty, possible_steps))
+        
+        # Create list of neighbor agents
         neighList = self.model.grid.get_neighbors(self.pos, moore=False, include_center=True)
 
                 
         # Stores all possible moves
         next_moves = [p for p,f in zip(possible_steps, freeSpaces) if f == True]
+        
+        # iterate through neighbor list
         for neighbor in neighList:
+            # If neighbor is a station
             if(isinstance(neighbor, StationAgent)):
+                # add station position to next moves list
                 next_moves.append(neighbor.pos)
+        
+        # array for possible distances 
         distances = []
         
+        # if next moves list is empty
         if len(next_moves) == 0:
+            # Add current position to it
             next_moves.append(self.pos)
 
         print("Last move: ", self.last_move)
         print("Next moves: ", next_moves)
 
+        # if next moves doesn't have only one option
+        # and the last move is part of next moves 
         if(not (len(next_moves) == 1) and self.last_move in next_moves):
+            # if last move exists
             if self.last_move != None:
+                # delete last move from next moves list
                 next_moves.remove(self.last_move)
 
         # Calculate manhattan distances from possible moves to point
@@ -181,7 +206,6 @@ class RobotAgent(Agent):
 
         # Minimun distance from list
         min_distance = min(distances)
-        # print(min_distance)
 
         # Set last move to current position before moving to new cell
         self.last_move = self.pos
@@ -190,52 +214,59 @@ class RobotAgent(Agent):
     
         return next_move
 
-        
+    # Function used to grab box
     def grab_box(self):
         """
         Method to check if there is a box in same position as self and grab it.
         """
+        # If robot isn't carrying box
         if(not self.carry_box):
+            # get list of agents in cell corresponding to current position
             agents = self.model.grid.get_cell_list_contents([self.pos])
+            # iterate through agents list
             for i in agents:
+                # If the agent is a box, box isn't taken and box isn't in station
                 if(isinstance(i, BoxAgent) and not i.taken and not i.inStation):
-                    self.box = i
-                    self.box.taken = True
-                    self.carry_box = True
+                    self.box = i # set agent's box pointer
+                    self.box.taken = True # set box as taken
+                    self.carry_box = True # indicate agent is carrying box
                     break
-
+    # Step
     def step(self):
         """ 
         Moves the robot agent.
         """
         self.move()
-        #self.move_to_cell((10, 1))
-        #self.find_closest_station()
 
+# Define obstacle agent
 class ObstacleAgent(Agent):
     """
     Obstacle agent. Just to add obstacles to the grid.
     """
+    # Initialize
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
 
+    # Step
     def step(self):
         pass   
 
+# Define box agent
 class BoxAgent(Agent):
     """
     Box agent. 
     """
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
-        self.unique_id = unique_id
-        self.taken = False
-        self.inStation = False
+        self.unique_id = unique_id # agent's id
+        self.taken = False # define if it was taken
+        self.inStation = False # define if it is in station 
 
+    # Step
     def step(self):
         pass
     
-
+# define station agent
 class StationAgent(Agent):
     """
     Station agent. 
@@ -243,20 +274,26 @@ class StationAgent(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
     
+    # Get number of boxes in station
     def get_num_boxes(self):
-        boxes = 0
+        boxes = 0 # initialize counter
+        # get agents list for current position
         agents = self.model.grid.get_cell_list_contents([self.pos])
+        # iterate throguh agents
         for i in agents:
+            # if the agent is a box
             if(isinstance(i, BoxAgent)):
+                # count box
                 boxes += 1
         print("Number of boxes: ", boxes)
         return boxes
-        
+    # steps
     def step(self): 
         pass
 
 #########################################################################################################################################
 
+# Define random model
 class RandomModel(Model):
     """ 
     Creates a new model with random agents.
@@ -265,50 +302,48 @@ class RandomModel(Model):
         height, width: The size of the grid to model
     """
     def __init__(self, N, width, height, box_num):
-        self.num_agents = N
-        self.grid = MultiGrid(width,height,torus = False) 
-        self.schedule = RandomActivation(self)
-        self.running = True 
-        self.box_num = box_num
-        self.station_num = box_num // 5
-        self.steps = 0
-        self.picked_boxes = 0
-       
-
-        self.datacollector = DataCollector( 
-        model_reporters={"Global Steps": lambda m: self.steps},
-        agent_reporters={"Steps": lambda a: a.steps_taken if isinstance(a, RobotAgent) else 0, "Grabbed Boxes": lambda b: b.grabbed_boxes if isinstance(b, RobotAgent) else 0})
+        self.num_agents = N # number of robots
+        self.grid = MultiGrid(width,height,torus = False) # define grid with width and height
+        self.schedule = RandomActivation(self) # define schedule
+        self.running = True # run simulation
+        self.box_num = box_num # number of boxes
+        self.station_num = box_num // 5 # number of stations
+        self.steps = 0 # steps taken
+        self.picked_boxes = 0 # picked boxes
         
 
         #Calculate Number of Stations
         if(box_num % 5 != 0):
-            self.station_num+=1
+            self.station_num+=1 # add 1 to station number
 
         # Creates the border of the grid
         border = [(x,y) for y in range(height) for x in range(width) if y in [0, height-1] or x in [0, width - 1]]
         
         # Build Border
         for pos in border:
+            # create obstacle agent
             obs = ObstacleAgent(pos, self)
             self.schedule.add(obs)
-            self.grid.place_agent(obs, pos)
+            self.grid.place_agent(obs, pos) # add to grid
 
         # Place Stations
-        sides = [0, 0, 0, 0]
+        sides = [0, 0, 0, 0] # array that defines number of station per side
+        # sides [x, x, y, y]
         indx = 0
 
         #Determine number of stations per side
         for i in range(self.station_num):
-            if(indx<=3):
-                sides[indx]+=1
-                indx+=1
+            if(indx<=3): # index range will always be 0-3
+                sides[indx]+=1 # add 1 to side count
+                indx+=1 # add one to index
             else:
-                indx=0
-                sides[indx]+=1
-                indx+=1
+                indx=0 # restart index
+                sides[indx]+=1 # add 1 to side count
+                indx+=1 # add one to index
         #Determine coords for each side
-        station_coords = []
-        y_up = False
+        station_coords = [] # array of station coordinates
+        # controllers for stations positions
+        y_up = False 
         x_left = False
         y=1
         x=1
@@ -318,13 +353,13 @@ class RandomModel(Model):
             if(sides[i]!=0):
                 #For horizontal sides
                 if(i < 2):
-                    if(y_up):
+                    if(y_up): # top side
                         y = self.grid.height-2
                     div = self.grid.width // sides[i] 
                     res = div // 2
                     for j in range(sides[i]):
-                        station_coords.append((res, y))
-                        y_up=True
+                        station_coords.append((res, y)) # place station coords
+                        y_up=True 
                         res+=div
 
                 #For vertical sides
