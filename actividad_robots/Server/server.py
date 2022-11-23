@@ -98,19 +98,10 @@ def getBoxes():
         for cell in randomModel.grid.coord_iter():
             cell_content, x, z = cell
             if cell_content:
-                station = None
+                
                 for agent in cell_content:
-                    if isinstance(agent, StationAgent):
-                        station = agent
-
-                if(station != None):
-                    for agent in cell_content:
-                        if isinstance(agent, BoxAgent) and agent.inStation:
-                            boxPositions.append({"id": str(agent.unique_id), "x": x, "y": station.get_num_boxes(), "z": z}) 
-                else:
-                    for agent in cell_content:
-                        if isinstance(agent, BoxAgent):
-                            boxPositions.append({"id": str(agent.unique_id), "x": x, "y": 1, "z": z})
+                    if isinstance(agent, BoxAgent):
+                        boxPositions.append({"id": str(agent.unique_id), "x": x, "y": 1, "z": z, "inStation": agent.inStation})
 
         return jsonify({'positions':boxPositions})
 

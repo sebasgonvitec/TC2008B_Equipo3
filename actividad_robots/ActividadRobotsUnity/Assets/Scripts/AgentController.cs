@@ -14,6 +14,7 @@ public class AgentData
 {
     public string id;
     public float x, y, z;
+    public bool inStation;
 
     public AgentData(string id, float x, float y, float z)
     {
@@ -21,6 +22,7 @@ public class AgentData
         this.x = x;
         this.y = y;
         this.z = z;
+        this.inStation = false;
     }
 }
 
@@ -97,7 +99,7 @@ public class AgentController : MonoBehaviour
                 Vector3 direction = currentPosition - interpolated;
 
                 agents[agent.Key].transform.localPosition = interpolated;
-                if (direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
+                //if(direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
             }
 
             // float t = (timer / timeToUpdate);
@@ -167,7 +169,7 @@ public class AgentController : MonoBehaviour
                 if (!started)
                 {
                     prevPositions[agent.id] = newAgentPosition;
-                    agents[agent.id] = Instantiate(agentPrefab, newAgentPosition, Quaternion.identity);
+                    agents[agent.id] = Instantiate(agentPrefab, newAgentPosition, agentPrefab.transform.rotation);
                 }
                 else
                 {
@@ -200,14 +202,24 @@ public class AgentController : MonoBehaviour
                 {
                     Debug.Log("Box Agent ID: " + agent.id);
                     prevPositions[agent.id] = newAgentPosition;
-                    agents[agent.id] = Instantiate(boxPrefab, newAgentPosition, Quaternion.identity);
+                    agents[agent.id] = Instantiate(boxPrefab, newAgentPosition, boxPrefab.transform.rotation);
                 }
                 else
                 {
-                    Vector3 currentPosition = new Vector3();
-                    if (currPositions.TryGetValue(agent.id, out currentPosition))
-                        prevPositions[agent.id] = currentPosition;
-                    currPositions[agent.id] = newAgentPosition;
+                    if(agent.inStation)
+                    {
+                        agents[agent.id].SetActive(false);
+                        agents.Remove(agent.id);
+                        currPositions.Remove(agent.id);
+                        prevPositions.Remove(agent.id);
+                    }
+                    else
+                    {
+                        Vector3 currentPosition = new Vector3();
+                        if (currPositions.TryGetValue(agent.id, out currentPosition))
+                            prevPositions[agent.id] = currentPosition;
+                        currPositions[agent.id] = newAgentPosition;
+                    }
                 }
             }
 
@@ -230,7 +242,7 @@ public class AgentController : MonoBehaviour
 
             foreach (AgentData obstacle in obstacleData.positions)
             {
-                Instantiate(obstaclePrefab, new Vector3(obstacle.x, obstacle.y, obstacle.z), Quaternion.identity);
+                Instantiate(obstaclePrefab, new Vector3(obstacle.x, obstacle.y, obstacle.z), obstaclePrefab.transform.rotation);
             }
         }
     }
