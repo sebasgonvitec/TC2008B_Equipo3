@@ -523,10 +523,10 @@ MonoBehaviour:
   floor: {fileID: 1824225223}
   stationPrefab: {fileID: 961990229689801968, guid: 65dea3a5917e4ac4db93ec75dab8b95e, type: 3}
   boxPrefab: {fileID: 8984637578724722113, guid: fd8fe1bd94d284046ad90beeb6750fc6, type: 3}
-  NAgents: 15
-  width: 28
-  height: 28
-  box_num: 15
+  NAgents: 10
+  width: 15
+  height: 15
+  box_num: 2
   timeToUpdate: 0.5
 --- !u!4 &1635008596
 Transform:

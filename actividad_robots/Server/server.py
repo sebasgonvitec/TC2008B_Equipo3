@@ -111,7 +111,20 @@ def updateModel():
     if request.method == 'GET':
         randomModel.step()
         currentStep += 1
-        return jsonify({'message':f'Model updated to step {currentStep}.', 'currentStep':currentStep})
+        return jsonify({'message':f'Model updated to step {currentStep}.', 'currentStep':currentStep, 'finished': not randomModel.running})
+
+@app.route('/runData', methods=['GET'])
+def getRunData():
+    global randomModel
+    if request.method == 'GET':
+        robotData = []
+        for cell in randomModel.grid.coord_iter():
+                cell_content, x, y = cell
+                for agent in cell_content:
+                    if isinstance(agent, RobotAgent):
+                        robotData.append({"id": str(agent.unique_id), "steps": str(agent.steps_taken), "grabbedBoxes": str(agent.grabbed_boxes)})
+                        #print("Robot Data: ", robotData)
+        return jsonify({"data": robotData})
 
 if __name__=='__main__':
     app.run(host="localhost", port=8585, debug=True)

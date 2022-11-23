@@ -356,16 +356,14 @@ class RandomModel(Model):
         if(self.picked_boxes == self.box_num):
             
             #Print Robot data
-            count = 1
             for cell in self.grid.coord_iter():
                 cell_content, x, y = cell
                 for agent in cell_content:
                     if isinstance(agent, RobotAgent):
-                        print("Robot ", count)
+                        print("Robot ", agent.unique_id)
                         print("Steps: ", agent.steps_taken)
                         print("Grabbed Boxes", agent.grabbed_boxes)
                         print("\n")
-                        count+=1
             
             #Print Time/Global Steps
             print("Time/Global Steps: ", self.steps)

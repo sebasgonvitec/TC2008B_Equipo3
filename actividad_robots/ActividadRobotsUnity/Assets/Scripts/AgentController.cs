@@ -10,6 +10,43 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 [Serializable]
+public class ModelData
+{
+    public string message;
+    public string steps;
+    public bool finished;
+
+    public ModelData(string message, string steps, bool finished)
+    {
+        this.message = message;
+        this.steps = steps;
+        this.finished = finished;
+    }
+}
+
+[Serializable]
+public class RobotData
+{
+    public string id;
+    public string steps;
+    public string grabbedBoxes;
+
+    public RobotData(string id, string steps, string grabbedBoxes)
+    {
+        this.id = id;
+        this.steps = steps;
+        this.grabbedBoxes = grabbedBoxes;
+    }
+}
+
+[Serializable]
+public class RunData
+{
+    public List<RobotData> data;
+
+    public RunData() => this.data = new List<RobotData>();
+}
+[Serializable]
 public class AgentData
 {
     public string id;
@@ -47,11 +84,14 @@ public class AgentController : MonoBehaviour
     string getBoxesEndpoint = "/getBoxes";
     string sendConfigEndpoint = "/init";
     string updateEndpoint = "/update";
+    string getDataEndpoint = "/runData";
     AgentsData agentsData, obstacleData, stationData, boxData;
+    RunData runData;
+    ModelData modelData;
     Dictionary<string, GameObject> agents;
     Dictionary<string, Vector3> prevPositions, currPositions;
 
-    bool updated = false, started = false;
+    bool updated = false, started = false, finished = false;
 
     public GameObject agentPrefab, obstaclePrefab, floor, stationPrefab, boxPrefab;
     public int NAgents, width, height, box_num;
@@ -89,20 +129,30 @@ public class AgentController : MonoBehaviour
 
         if (updated)
         {
-            timer -= Time.deltaTime;
-            dt = 1.0f - (timer / timeToUpdate);
-
-            foreach (var agent in currPositions)
+            if (finished)
             {
-                Vector3 currentPosition = agent.Value;
-                Vector3 previousPosition = prevPositions[agent.Key];
-
-                Vector3 interpolated = Vector3.Lerp(previousPosition, currentPosition, dt);
-                Vector3 direction = currentPosition - interpolated;
-
-                agents[agent.Key].transform.localPosition = interpolated;
-                if(direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
+                Debug.Log("Finished!!");
+                StartCoroutine(GetRobotsData());
+                //enabled = false;
             }
+            else
+            {
+                timer -= Time.deltaTime;
+                dt = 1.0f - (timer / timeToUpdate);
+
+                foreach (var agent in currPositions)
+                {
+                    Vector3 currentPosition = agent.Value;
+                    Vector3 previousPosition = prevPositions[agent.Key];
+
+                    Vector3 interpolated = Vector3.Lerp(previousPosition, currentPosition, dt);
+                    Vector3 direction = currentPosition - interpolated;
+
+                    agents[agent.Key].transform.localPosition = interpolated;
+                    //if (direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
+                }
+            }
+            
 
             // float t = (timer / timeToUpdate);
             // dt = t * t * ( 3f - 2f*t);
@@ -118,6 +168,12 @@ public class AgentController : MonoBehaviour
             Debug.Log(www.error);
         else
         {
+            modelData = JsonUtility.FromJson<ModelData>(www.downloadHandler.text);
+
+            Debug.Log(modelData.finished);
+
+            finished = modelData.finished;
+
             StartCoroutine(GetAgentsData());
             StartCoroutine(GetBoxData());
             StartCoroutine(GetStationData());
@@ -276,6 +332,28 @@ public class AgentController : MonoBehaviour
                     Instantiate(boxPrefab, new Vector3(station.x, station.y+(station.numBoxes)-0.5f, station.z), Quaternion.identity);
                 }
                 
+            }
+
+            updated = true;
+        }
+    }
+
+    IEnumerator GetRobotsData()
+    {
+        UnityWebRequest www = UnityWebRequest.Get(serverUrl + getDataEndpoint);
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+            Debug.Log(www.error);
+        else
+        {
+            runData = JsonUtility.FromJson<RunData>(www.downloadHandler.text);
+            Debug.Log(runData.ToString());
+
+            foreach (RobotData robotData in runData.data)
+            {
+                TextMesh robotText = (TextMesh)agents[robotData.id].transform.GetChild(0).gameObject.GetComponent(typeof(TextMesh));
+                robotText.text = $"Setps: {robotData.steps} {Environment.NewLine} Boxes: {robotData.grabbedBoxes}";
             }
         }
     }
