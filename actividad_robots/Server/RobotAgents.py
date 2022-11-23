@@ -1,73 +1,87 @@
 """
-Modelos de Agente y ambiente (alamacen)
-Movimiento de robots en el grid
+Agents and storage models
+Robots movements in the grid
 15-11-2022
 
-Autores: Sebastián González,
-         Andreína Sanánez,
-         Karla Mondragón,
-         Ana Paula Katsuda
+Authors: Sebastián González, A01029746
+         Andreína Sanánez, A01024927
+         Karla Mondragón, A01025108
+         Ana Paula Katsuda, A01025303
 """
 
+# Imports
 from mesa import Agent, Model
 from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
 from mesa.space import MultiGrid
 
-# TODO: Ir a la estación después de agarrar una caja
-# TODO: Dejar la caja en la estación y continuar comportamiento random
-
+# Class for robot agents 
 class RobotAgent(Agent):
     """
-    Agent that moves randomly.
+    Agent that moves randomly unless a box is detected or grabbed.
+    Agent moves towards box when it detects one and is not grabbing anything.
+    Agent moves towards closest station when grabbing a box 
     Attributes:
         unique_id: Agent's ID 
-        direction: Randomly chosen direction chosen from one of eight directions
+        
     """
     def __init__(self, unique_id, model):
         """
-        Creates a new random agent.
+        Creates a new robot agent.
         Args:
             unique_id: The agent's ID
             model: Model reference for the agent
         """
         super().__init__(unique_id, model)
-        #self.direction = 1
-        self.carry_box = False
-        self.box = None
-        self.unique_id = unique_id
-        self.last_move = None
-        self.steps_taken = 0
-        self.grabbed_boxes = 0
+        # Definition of attributes
+        self.carry_box = False # Indicates if agent is carrying box
+        self.box = None # Points to a box agent
+        self.unique_id = unique_id # Defines agent id
+        self.last_move = None # Indicates agent's previous move
+        self.steps_taken = 0 # Indicates the number of steps taken by agent
+        self.grabbed_boxes = 0 # Indicates the number of boxes grabbed by agent
 
+    # Definition of robot movement
     def move(self):
         """ 
-        Determines if the agent can move in the direction that was chosen
+        Determines the direction in which agents needs to move
         """
+        # Define possible steps 
         possible_steps = self.model.grid.get_neighborhood(
-            self.pos,
-            moore=False, # Boolean for whether to use Moore neighborhood (including diagonals) or Von Neumann (only up/down/left/right).
-            include_center=True) 
+            self.pos, # Current position
+            moore=False, # Only allow Von Neumann movement (only up/down/left/right).
+            include_center=True) # Current position is an option
         
         # Checks which grid cells are empty
         freeSpaces = list(map(self.model.grid.is_cell_empty, possible_steps))
         
+        # Gets possible moves considering empty coordinates
         next_moves = [p for p,f in zip(possible_steps, freeSpaces) if f == True]
     
-        # Lista de agentes vecinos
+        # List of neighbor agents --> considering Von Neumann and current position (center)
         neighList = self.model.grid.get_neighbors(self.pos, moore=False, include_center=True)
 
+        # If the agent has possible moves
         if(len(next_moves) > 0):
+            # move to a random cell
             next_move = self.random.choice(next_moves)
+        # If the agent doesn't have possible moves
         else:
+            # Stay in current position
             next_move = self.pos
 
+        # Iterate through neighbor list
         for neighbor in neighList:
+            # if the robot agent is in the same position as a box agent
             if(isinstance(neighbor, BoxAgent) and neighbor.pos == self.pos):
+                # Grab the box
                 self.grab_box()
+            # if the robot agent is not carrying a box, the box detected isn't in station and the agent isn't in the same cell as box
             elif(isinstance(neighbor, BoxAgent) and neighbor.pos != self.pos and not self.carry_box and not neighbor.inStation):
+                # move towards box
                 next_move = neighbor.pos
-                 
+        
+        # 
         if(self.carry_box):
             print("Closest station: ", self.find_closest_station())
             station = self.find_closest_station() 
