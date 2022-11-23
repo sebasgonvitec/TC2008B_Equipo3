@@ -35,6 +35,7 @@ class RobotAgent(Agent):
         self.carry_box = False
         self.box = None
         self.unique_id = unique_id
+        self.last_move = None
 
     def move(self):
         """ 
@@ -47,37 +48,12 @@ class RobotAgent(Agent):
         
         # Checks which grid cells are empty
         freeSpaces = list(map(self.model.grid.is_cell_empty, possible_steps))
-
+        
         next_moves = [p for p,f in zip(possible_steps, freeSpaces) if f == True]
     
         # Lista de agentes vecinos
         neighList = self.model.grid.get_neighbors(self.pos, moore=False, include_center=True)
 
-        # if(self.carry_box):
-        #     min_distance = abs(next_moves[0][0] - self.find_closest_station()[0]) + abs(next_moves[0][1] - self.find_closest_station()[1])
-        #     for move in next_moves:
-        #          current_distance = abs(move[0] - self.find_closest_station()[0]) + abs(move[1] - self.find_closest_station()[1])
-        #          if(current_distance < min_distance):
-        #              min_distance = current_distance
-        #              next_move = move
-        #              print("Next Move station:", next_move)
-        #              self.model.grid.move_agent(self, next_move) 
-
-        # else:
-        #     if(len(next_moves) > 0):
-        #         next_move = self.random.choice(next_moves)
-        #     else:
-        #         next_move = self.pos
-        #     # 
-        #     for neighbor in neighList:
-        #         if(isinstance(neighbor, BoxAgent) and neighbor.pos == self.pos):
-        #             self.grab_box()
-        #         elif(isinstance(neighbor, BoxAgent) and neighbor.pos != self.pos and not self.carry_box):
-        #             next_move = neighbor.pos
-
-        #     self.model.grid.move_agent(self, next_move)      
-        #     if(self.carry_box):
-        #         self.box.model.grid.move_agent(self.box, next_move)
         if(len(next_moves) > 0):
             next_move = self.random.choice(next_moves)
         else:
@@ -90,11 +66,12 @@ class RobotAgent(Agent):
                 next_move = neighbor.pos
                  
         if(self.carry_box):
-            print("Closest station: ", self.find_closest_station()) 
-            next_move= self.move_to_cell(self.find_closest_station())
+            print("Closest station: ", self.find_closest_station())
+            station = self.find_closest_station() 
+            next_move= self.move_to_cell(station)
             self.box.model.grid.move_agent(self.box, next_move)
             print(next_move)
-            if(next_move == self.find_closest_station()): #Falta checar que station no esté llena 
+            if(next_move == station):
                 #self.box.model.grid.move_agent(self.box, next_move)
                 next_move = self.pos
                 self.carry_box = False
@@ -117,9 +94,9 @@ class RobotAgent(Agent):
             cell_contents, x, y, = cell
             for agent in cell_contents:
                 if isinstance(agent, StationAgent):
-                    if(agent.num_boxes < 5):
+                    if(agent.get_num_boxes() < 5):
                         stations.append((x, y))
-                        print("Station number of boxes: ", agent.num_boxes)
+                        #print("Station number of boxes: ", agent.get_num_boxes())
         
         #print("stations1: ", stations)
         # Initialize minimum distance with distance from agent to first station in list        
@@ -153,6 +130,7 @@ class RobotAgent(Agent):
         # Checks which grid cells are empty
         freeSpaces = list(map(self.model.grid.is_cell_empty, possible_steps))
         neighList = self.model.grid.get_neighbors(self.pos, moore=False, include_center=True)
+
                 
         # Stores all possible moves
         next_moves = [p for p,f in zip(possible_steps, freeSpaces) if f == True]
@@ -160,6 +138,16 @@ class RobotAgent(Agent):
             if(isinstance(neighbor, StationAgent)):
                 next_moves.append(neighbor.pos)
         distances = []
+        
+        if len(next_moves) == 0:
+            next_moves.append(self.pos)
+
+        print("Last move: ", self.last_move)
+        print("Next moves: ", next_moves)
+
+        if(not (len(next_moves) == 1) and self.last_move in next_moves):
+            if self.last_move != None:
+                next_moves.remove(self.last_move)
 
         # Calculate manhattan distances from possible moves to point
         for move in next_moves:
@@ -168,6 +156,9 @@ class RobotAgent(Agent):
         # Minimun distance from list
         min_distance = min(distances)
         # print(min_distance)
+
+        # Set last move to current position before moving to new cell
+        self.last_move = self.pos
         # Set next move to corresponding minimum distance
         next_move = next_moves[distances.index(min_distance)] 
     
@@ -225,8 +216,16 @@ class StationAgent(Agent):
     """
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
-        self.num_boxes = 0
     
+    def get_num_boxes(self):
+        boxes = 0
+        agents = self.model.grid.get_cell_list_contents([self.pos])
+        for i in agents:
+            if(isinstance(i, BoxAgent)):
+                boxes += 1
+        print("Number of boxes: ", boxes)
+        return boxes
+        
     def step(self): 
         pass
 
@@ -325,7 +324,7 @@ class RandomModel(Model):
 
         # Add the box to a random empty grid cell
         for i in range(self.box_num):
-            a = BoxAgent(i+3000, self) 
+            a = BoxAgent(i+2000, self) 
             self.schedule.add(a)
 
             pos_gen = lambda w, h: (self.random.randrange(w), self.random.randrange(h))

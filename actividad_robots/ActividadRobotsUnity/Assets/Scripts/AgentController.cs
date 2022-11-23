@@ -40,15 +40,16 @@ public class AgentController : MonoBehaviour
     string getAgentsEndpoint = "/getAgents";
     string getObstaclesEndpoint = "/getObstacles";
     string getStationsEndpoint = "/getStations";
+    string getBoxesEndpoint = "/getBoxes";
     string sendConfigEndpoint = "/init";
     string updateEndpoint = "/update";
-    AgentsData agentsData, obstacleData, stationData;
+    AgentsData agentsData, obstacleData, stationData, boxData;
     Dictionary<string, GameObject> agents;
     Dictionary<string, Vector3> prevPositions, currPositions;
 
     bool updated = false, started = false;
 
-    public GameObject agentPrefab, obstaclePrefab, floor, stationPrefab;
+    public GameObject agentPrefab, obstaclePrefab, floor, stationPrefab, boxPrefab;
     public int NAgents, width, height, box_num;
     public float timeToUpdate = 5.0f;
     private float timer, dt;
@@ -58,6 +59,7 @@ public class AgentController : MonoBehaviour
         agentsData = new AgentsData();
         obstacleData = new AgentsData();
         stationData = new AgentsData();
+        boxData = new AgentsData();
 
         prevPositions = new Dictionary<string, Vector3>();
         currPositions = new Dictionary<string, Vector3>();
@@ -113,6 +115,8 @@ public class AgentController : MonoBehaviour
         else
         {
             StartCoroutine(GetAgentsData());
+            StartCoroutine(GetBoxData());
+
         }
     }
 
@@ -141,6 +145,7 @@ public class AgentController : MonoBehaviour
             StartCoroutine(GetAgentsData());
             StartCoroutine(GetObstacleData());
             StartCoroutine(GetStationData());
+            StartCoroutine(GetBoxData());
         }
     }
 
@@ -172,6 +177,39 @@ public class AgentController : MonoBehaviour
                     currPositions[agent.id] = newAgentPosition;
                 }
             }
+            updated = true;
+        }
+    }
+
+    IEnumerator GetBoxData()
+    {
+        UnityWebRequest www = UnityWebRequest.Get(serverUrl + getBoxesEndpoint);
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+            Debug.Log(www.error);
+        else
+        {
+            boxData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
+          
+            foreach (AgentData agent in boxData.positions)
+            {
+                Vector3 newAgentPosition = new Vector3(agent.x, agent.y, agent.z);
+       
+                if (!started)
+                {
+                    Debug.Log("Box Agent ID: " + agent.id);
+                    prevPositions[agent.id] = newAgentPosition;
+                    agents[agent.id] = Instantiate(boxPrefab, newAgentPosition, Quaternion.identity);
+                }
+                else
+                {
+                    Vector3 currentPosition = new Vector3();
+                    if (currPositions.TryGetValue(agent.id, out currentPosition))
+                        prevPositions[agent.id] = currentPosition;
+                    currPositions[agent.id] = newAgentPosition;
+                }
+            }
 
             updated = true;
             if (!started) started = true;
@@ -188,8 +226,7 @@ public class AgentController : MonoBehaviour
         else
         {
             obstacleData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
-
-            Debug.Log(obstacleData.positions);
+            //Debug.Log(obstacleData.positions);
 
             foreach (AgentData obstacle in obstacleData.positions)
             {
@@ -209,7 +246,7 @@ public class AgentController : MonoBehaviour
         {
             stationData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
 
-            Debug.Log(stationData.positions);
+            //Debug.Log(stationData.positions);
 
             foreach (AgentData station in stationData.positions)
             {
