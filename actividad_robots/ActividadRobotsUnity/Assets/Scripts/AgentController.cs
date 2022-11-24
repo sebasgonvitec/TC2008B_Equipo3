@@ -2,6 +2,13 @@
 // C# client to interact with Python. Based on the code provided by Sergio Ruiz.
 // Octavio Navarro. October 2021
 
+/*
+Sebastián González, A01029746
+Karla Mondragón, A01025108
+Andreína Sananez, A01024927
+Ana Paula Katsuda, A01025303
+*/
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,12 +18,12 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 
 [Serializable]
-public class ModelData
+public class ModelData // Class for model data 
 {
     public string message;
     public string steps;
     public bool finished;
-
+    // Attributes
     public ModelData(string message, string steps, bool finished)
     {
         this.message = message;
@@ -26,8 +33,9 @@ public class ModelData
 }
 
 [Serializable]
-public class RobotData
+public class RobotData // Class for robot data
 {
+    // Attributes
     public string id;
     public string steps;
     public string grabbedBoxes;
@@ -41,15 +49,16 @@ public class RobotData
 }
 
 [Serializable]
-public class RunData
+public class RunData // Class for run data
 {
     public List<RobotData> data;
 
     public RunData() => this.data = new List<RobotData>();
 }
 [Serializable]
-public class AgentData
+public class AgentData // Class for agent data
 {
+    // Attributes
     public string id;
     public float x, y, z;
     public bool inStation;
@@ -68,16 +77,18 @@ public class AgentData
 
 [Serializable]
 
-public class AgentsData
+public class AgentsData // agents data 
 {
     public List<AgentData> positions;
 
     public AgentsData() => this.positions = new List<AgentData>();
 }
 
-public class AgentController : MonoBehaviour
+public class AgentController : MonoBehaviour // Class agent controller
 {
     // private string url = "https://agents.us-south.cf.appdomain.cloud/";
+    // Define variables 
+    // Endpoints
     string serverUrl = "http://localhost:8585";
     string getAgentsEndpoint = "/getAgents";
     string getObstaclesEndpoint = "/getObstacles";
@@ -86,50 +97,64 @@ public class AgentController : MonoBehaviour
     string sendConfigEndpoint = "/init";
     string updateEndpoint = "/update";
     string getDataEndpoint = "/runData";
+    // Data instances
     AgentsData agentsData, obstacleData, stationData, boxData;
     RunData runData;
     ModelData modelData;
+    // Dictionaries for agents and positions
     Dictionary<string, GameObject> agents;
     Dictionary<string, Vector3> prevPositions, currPositions;
 
+    // Simulation states
     bool updated = false, started = false, finished = false;
 
+    // Prefabs
     public GameObject agentPrefab, obstaclePrefab, floor, stationPrefab, boxPrefab;
+    // Timer text
     public GameObject timerText;
+    // params
     public int NAgents, width, height, box_num;
+    // Time for simulation
     public float timeToUpdate = 5.0f;
     public float timeElapsed = 0;
     private float timer, dt;
 
+    // Initialize
     void Start()
     {
+        // initialize data
         agentsData = new AgentsData();
         obstacleData = new AgentsData();
         stationData = new AgentsData();
         boxData = new AgentsData();
 
+        // Positions dictionaries
         prevPositions = new Dictionary<string, Vector3>();
         currPositions = new Dictionary<string, Vector3>();
 
+        // agents dictionary
         agents = new Dictionary<string, GameObject>();
 
+        // Scale floor 
         floor.transform.localScale = new Vector3((float)width / 10, 1, (float)height / 10);
         floor.transform.localPosition = new Vector3((float)width / 2 - 0.5f, 0.5f, (float)height / 2 - 0.5f);
 
         timer = timeToUpdate;
-
+        // Send configuration coroutine
         StartCoroutine(SendConfiguration());
     }
 
+    // update
     private void Update()
     {
+        
         if (timer < 0)
         {
             timer = timeToUpdate;
             updated = false;
             StartCoroutine(UpdateSimulation());
         }
-
+        // 
         if (updated)
         {
             if (finished)
@@ -163,21 +188,21 @@ public class AgentController : MonoBehaviour
         }
     }
 
+    // Update simulaton co routine 
     IEnumerator UpdateSimulation()
     {
+        // Call endpoint
         UnityWebRequest www = UnityWebRequest.Get(serverUrl + updateEndpoint);
         yield return www.SendWebRequest();
-
+        // catch error
         if (www.result != UnityWebRequest.Result.Success)
             Debug.Log(www.error);
+        // If there is no error
         else
         {
             modelData = JsonUtility.FromJson<ModelData>(www.downloadHandler.text);
-
-            //Debug.Log(modelData.finished);
-
             finished = modelData.finished;
-
+            // Start coroutines
             StartCoroutine(GetAgentsData());
             StartCoroutine(GetBoxData());
             StartCoroutine(GetStationData());
