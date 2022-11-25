@@ -2,12 +2,13 @@
 Python Flask server for connection with Unity
 15-11-2022
 
-Autores: Sebastián González,
-         Andreína Sanánez,
-         Karla Mondragón,
-         Ana Paula Katsuda
+Autores: Sebastián González, A01029746
+         Andreína Sanánez, A01024927
+         Karla Mondragón, A01025108
+         Ana Paula Katsuda, A01025303
 """
 
+# Imports
 from flask import Flask, request, jsonify
 from mesa import Agent, Model
 from mesa.space import MultiGrid
@@ -25,6 +26,7 @@ app = Flask("Traffic Example")
 
 # @app.route('/', methods=['POST', 'GET'])
 
+# initialize endpoint
 @app.route('/init', methods=['POST', 'GET'])
 def initModel():
     global currentStep, randomModel, number_agents, width, height, box_num
@@ -42,6 +44,7 @@ def initModel():
 
         return jsonify({"message":"Parameters recieved, model initiated."})
 
+# Endpoint for agents
 @app.route('/getAgents', methods=['GET'])
 def getAgents():
     global randomModel
@@ -58,6 +61,7 @@ def getAgents():
         # print("Agents Positions: ", robotPositions)
         return jsonify({'positions':robotPositions})
 
+# Endpoint for obstacles
 @app.route('/getObstacles', methods=['GET'])
 def getObstacles():
     global randomModel
@@ -74,6 +78,7 @@ def getObstacles():
         # print("Obstacle Positions: ", obsPositions)
         return jsonify({'positions':obsPositions})
 
+# Endpoint for stations
 @app.route('/getStations', methods=['GET'])
 def getStations():
     global randomModel
@@ -89,6 +94,7 @@ def getStations():
 
         return jsonify({'positions':stationPositions})
 
+# Endpoint for boxes
 @app.route('/getBoxes', methods=['GET'])
 def getBoxes():
     global randomModel
@@ -105,6 +111,7 @@ def getBoxes():
 
         return jsonify({'positions':boxPositions})
 
+# Endpoint for update
 @app.route('/update', methods=['GET'])
 def updateModel():
     global currentStep, randomModel
@@ -113,6 +120,7 @@ def updateModel():
         currentStep += 1
         return jsonify({'message':f'Model updated to step {currentStep}.', 'currentStep':currentStep, 'finished': not randomModel.running})
 
+# Endpoint for data
 @app.route('/runData', methods=['GET'])
 def getRunData():
     global randomModel
