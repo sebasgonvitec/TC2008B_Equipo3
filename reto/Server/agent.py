@@ -2,31 +2,34 @@ from mesa import Agent
 
 class Car(Agent):
     """
-    Agent that moves randomly.
+    Agent that simulates the behaviour of a car in traffic
     Attributes:
         unique_id: Agent's ID 
-        direction: Randomly chosen direction chosen from one of eight directions
+        destination (tuple): Coordinates of the destination
     """
-    def __init__(self, unique_id, model):
+    def __init__(self, unique_id, model, destination):
         """
         Creates a new random agent.
         Args:
             unique_id: The agent's ID
             model: Model reference for the agent
+            destination: Coordinates of the destination
         """
         super().__init__(unique_id, model)
+        self.destination = destination
 
     def move(self):
-        """ 
+        """
         Determines if the agent can move in the direction that was chosen
-        """        
+        """
         self.model.grid.move_to_empty(self)
 
     def step(self):
         """ 
         Determines the new direction it will take, and then moves
         """
-        self.move()
+        #self.move()
+        print("Destination: ", self.destination)
 
 class Traffic_Light(Agent):
     """
@@ -87,6 +90,22 @@ class Road(Agent):
         """
         super().__init__(unique_id, model)
         self.direction = direction
+
+    def step(self):
+        pass
+
+class Intersection(Agent):
+    """
+    Intersection agent. Determines where the cars can move, and in which directions.
+    """
+    def __init__(self, unique_id, model, direction= "Left"):
+        """
+        Creates a new road.
+        Args:
+            unique_id: The agent's ID
+            model: Model reference for the agent
+        """
+        super().__init__(unique_id, model)
 
     def step(self):
         pass

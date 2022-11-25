@@ -6,5 +6,6 @@
     "#" : "Obstacle",
     "v" : "Down",
     "^" : "Up",
-    "D" : "Destination"
+    "D" : "Destination",
+    "x" : "Intersection"
 }

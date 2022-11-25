@@ -13,6 +13,10 @@ def agent_portrayal(agent):
                  "h": 1
                  }
 
+    if (isinstance(agent, Car)):
+        portrayal["Color"] = "red"
+        portrayal["Layer"] = 1
+
     if (isinstance(agent, Road)):
         portrayal["Color"] = "grey"
         portrayal["Layer"] = 0
