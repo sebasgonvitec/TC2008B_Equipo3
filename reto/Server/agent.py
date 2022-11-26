@@ -17,11 +17,13 @@ class Car(Agent):
         """
         super().__init__(unique_id, model)
         self.destination = destination
+        #self.route = self.get_route()
 
     def move(self):
         """
         Determines if the agent can move in the direction that was chosen
         """
+
         self.model.grid.move_to_empty(self)
 
     def step(self):
@@ -29,7 +31,15 @@ class Car(Agent):
         Determines the new direction it will take, and then moves
         """
         #self.move()
+        
+        print("Cars Route: ", self.get_route())
         print("Destination: ", self.destination)
+    
+    def get_route(self):
+        """
+        Determines the route that the agent will take
+        """
+        return self.model.graph.a_star_algorithm(self.pos, self.destination)
 
 class Traffic_Light(Agent):
     """
