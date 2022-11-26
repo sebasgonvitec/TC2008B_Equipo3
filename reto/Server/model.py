@@ -100,8 +100,7 @@ class Graph:
         
 class RandomModel(Model):
 
-    # TODO: Add node connections in list to allow mutiple per node
-    # TODO: A * Algorithm
+    # TODO: Fix connections of the graph
 
     """ 
     Creates a new model with random agents.

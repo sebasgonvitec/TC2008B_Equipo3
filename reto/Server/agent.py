@@ -1,6 +1,7 @@
 from mesa import Agent
 
 class Car(Agent):
+    # TODO: Add beheavior for obstacle and car evasion 
     """
     Agent that simulates the behaviour of a car in traffic
     Attributes:
@@ -17,23 +18,29 @@ class Car(Agent):
         """
         super().__init__(unique_id, model)
         self.destination = destination
-        #self.route = self.get_route()
+        self.route = None
+        self.calculated_route = False
 
     def move(self):
         """
-        Determines if the agent can move in the direction that was chosen
+        Moves the agent to the next node in the route
         """
-
-        self.model.grid.move_to_empty(self)
+        if(self.pos == self.destination):
+            pass
+        else:
+            next_move = self.route.pop(0)
+            self.model.grid.move_agent(self, next_move)
 
     def step(self):
         """ 
         Determines the new direction it will take, and then moves
         """
-        #self.move()
-        
-        print("Cars Route: ", self.get_route())
-        print("Destination: ", self.destination)
+        if(not self.calculated_route):
+            self.route = self.get_route()
+            self.calculated_route = True
+            self.move()
+        else: 
+            self.move()
     
     def get_route(self):
         """
