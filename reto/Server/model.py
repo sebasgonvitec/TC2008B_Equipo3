@@ -28,10 +28,44 @@ class Graph:
         # haven't all been inspected, starts off with the start node
         # closed_list is a list of nodes which have been visited
         # and who's neighbors have been inspected
+        
+        # TODO: Función de buscar neighbors --> condición: qué esté libre y dirección
+        
         open_list = set([start_node])
         closed_list = set([])
 
-        # g contains current distances from start_node to all other nodes
+
+        '''
+        Pseudocódigo
+
+        initialize open list with start node 
+        initialize closed list --> empty
+        while open list isn't empty
+            - g distance from current node to start node 
+            - h distance from current node to end node 
+            - f total cost (g + h)
+            current node --> node with f smaller value (f = g+h)
+            remove current node from open list
+            add current node to the closed list 
+            if current node is destination: 
+                path found --> move agent to position 
+            if current node isn't destination:
+                children = adjacent nodes --> neighbors --> possible steps
+            for each child in children: 
+                if child is in closed list: 
+                    continue to begining of for loop
+                child.g = current node.g + distance between child and current
+                child.h = manhattan distance from child to destination
+                child.f = child.g + child.h
+                if child.position is in the open list node's position:
+                    if child.g > node.g in open list:
+                        continue to begining of for loop
+                    add child to open list 
+        '''
+        # g distance from current node to start node 
+        # h distance from current node to end node 
+        # f total cost (g + h)
+
         # the default value (if it's not found in the map) is +infinity
         g = {}
 
@@ -41,7 +75,9 @@ class Graph:
         parents = {}
         parents[start_node] = start_node
 
+        # while list isn't empty
         while len(open_list) > 0:
+            # current node --> node with f smaller value (f = g+h)
             n = None
 
             # find a node with the lowest value of f() - evaluation function
