@@ -4,103 +4,11 @@ from mesa.space import MultiGrid
 from agent import *
 from collections import deque
 import json
-
-class Graph:
-    def __init__(self, adjacency_list):
-        self.adjacency_list = adjacency_list
-        print("Graphs adjacency list: ", self.adjacency_list)
-
-    def get_neighbors(self, v):
-        return self.adjacency_list[v]
-
-    # heuristic function with equal values for all nodes
-    def h(self, n):
-        H = {}
-        values = self.adjacency_list.values()
-        for value in values:
-            for node in value:
-                H[node] = 1
-
-        return H[n]
-
-    def a_star_algorithm(self, start_node, stop_node):
-        # open_list is a list of nodes which have been visited, but who's neighbors
-        # haven't all been inspected, starts off with the start node
-        # closed_list is a list of nodes which have been visited
-        # and who's neighbors have been inspected
-        open_list = set([start_node])
-        closed_list = set([])
-
-        # g contains current distances from start_node to all other nodes
-        # the default value (if it's not found in the map) is +infinity
-        g = {}
-
-        g[start_node] = 0
-
-        # parents contains an adjacency map of all nodes
-        parents = {}
-        parents[start_node] = start_node
-
-        while len(open_list) > 0:
-            n = None
-
-            # find a node with the lowest value of f() - evaluation function
-            for v in open_list:
-                if n == None or g[v] + self.h(v) < g[n] + self.h(n):
-                    n = v;
-
-            if n == None:
-                print('Path does not exist!')
-                return None
-
-            # if the current node is the stop_node
-            # then we begin reconstructin the path from it to the start_node
-            if n == stop_node:
-                reconst_path = []
-
-                while parents[n] != n:
-                    reconst_path.append(n)
-                    n = parents[n]
-
-                reconst_path.append(start_node)
-
-                reconst_path.reverse()
-
-                print('Path found: {}'.format(reconst_path))
-                return reconst_path
-
-            # for all neighbors of the current node do
-            for (m) in self.get_neighbors(n):
-                # if the current node isn't in both open_list and closed_list
-                # add it to open_list and note n as it's parent
-                if m not in open_list and m not in closed_list:
-                    open_list.add(m)
-                    parents[m] = n
-                    g[m] = g[n] + 1
-
-                # otherwise, check if it's quicker to first visit n, then m
-                # and if it is, update parent data and g data
-                # and if the node was in the closed_list, move it to open_list
-                else:
-                    if g[m] > g[n] + 1:
-                        g[m] = g[n] + 1
-                        parents[m] = n
-
-                        if m in closed_list:
-                            closed_list.remove(m)
-                            open_list.add(m)
-
-            # remove n from the open_list, and add it to closed_list
-            # because all of his neighbors were inspected
-            open_list.remove(n)
-            closed_list.add(n)
-
-        print('Path does not exist!')
-        return None
         
 class RandomModel(Model):
 
     # TODO: Fix connections of the graph
+    # TODO: Add weights to the graph (cars in route) for every re-route
 
     """ 
     Creates a new model with random agents.
@@ -114,9 +22,19 @@ class RandomModel(Model):
         self.traffic_lights = []
         self.destinations = []
         self.graph = None
+        self.directions = {
+            # (axis, value)
+            # axis: 0=x, 1=y
+            # value: direction of movement
+            "Up": (1,1),
+            "Down": (1,-1),
+            "Right": (0,1),
+            "Left": (0,-1)
+        }
+        self.corners = []
 
-        #with open('2022_base.txt') as baseFile:
-        with open('base_prueba.txt') as baseFile:
+        with open('2022_base.txt') as baseFile:
+        #with open('base_prueba.txt') as baseFile:
             lines = baseFile.readlines()
             self.width = len(lines[0])-1
             self.height = len(lines)
@@ -145,162 +63,31 @@ class RandomModel(Model):
                         self.destinations.append((c, self.height - r - 1))
                         self.grid.place_agent(agent, (c, self.height - r - 1))
 
-        # Create car agent and randomly asign destination
-        rand_dest = self.random.choice(self.destinations)
-        car = Car(1337, self, rand_dest)
-        self.schedule.add(car)
-        self.grid.place_agent(car, (0,1))
+        self.corners = [(0,0), (0, self.height - 1), (self.width - 1, 0), (self.width - 1, self.height - 1)]
 
-        #print(self.create_adjacency_list())
-        self.graph = Graph(self.create_adjacency_list())
-        #graph.a_star_algorithm((1,1), (19,2))
-        #graph.a_star_algorithm((6,1), (4,3))
+        # # Create car agent and randomly asign destination
+        # rand_dest = self.random.choice(self.destinations)
+        # car = Car(1337, self, rand_dest)
+        # self.schedule.add(car)
+        # self.grid.place_agent(car, (23,24))
+
         self.num_agents = N
         self.running = True
-        
-    def create_adjacency_list(self):
-        """
-        Returns a dictionary of the adjacency list of the grid.
-        """
-        adjacency_list = {}
-
-        for cell in self.grid.coord_iter():
-            cell_content, x, y = cell
-            if cell_content:
-                for agent in cell_content:
-                    if isinstance(agent, Road):
-                        neighbors = self.grid.get_neighbors(agent.pos, moore = False, include_center = False)
-                        for n in neighbors:
-                            if n:
-                                if isinstance(n, Road):
-                                    # Node edeges for Road Facing Left
-                                    if(agent.direction == "Left"):
-                                        # Get 1st and 3rd neighbors
-                                        if(n.pos[1] == agent.pos[1] + 1 or n.pos[1] == agent.pos[1] - 1):
-                                            if(n.direction != agent.direction or isinstance(n, Traffic_Light) or isinstance(n, Destination)):
-                                                if agent.pos in adjacency_list:
-                                                    adjacency_list[agent.pos].append(n.pos)
-                                                else:
-                                                    adjacency_list[agent.pos] = [n.pos]
-                                        # # Get 2nd neighbor
-                                        elif(n.pos[0] == agent.pos[0]+1):
-                                            pass
-                                        # Get 4th neighbor
-                                        elif(n.pos[0] == agent.pos[0]-1):
-                                            if agent.pos in adjacency_list:
-                                                adjacency_list[agent.pos].append(n.pos)
-                                            else:
-                                                adjacency_list[agent.pos] = [n.pos]
-                                    # Node edeges for Road Facing Left
-                                    elif(agent.direction == "Right"):
-                                        # Get 1st and 3rd neighbors
-                                        if(n.pos[1] == agent.pos[1] + 1 or n.pos[1] == agent.pos[1] - 1):
-                                            if(n.direction != agent.direction or isinstance(n, Traffic_Light) or isinstance(n, Destination)):
-                                                if agent.pos in adjacency_list:
-                                                    adjacency_list[agent.pos].append(n.pos)
-                                                else:
-                                                    adjacency_list[agent.pos] = [n.pos]
-                                        # # Get 4nd neighbor
-                                        elif(n.pos[0] == agent.pos[0]-1):
-                                            pass
-                                        # Get 2th neighbor
-                                        elif(n.pos[0] == agent.pos[0]+1):
-                                            if agent.pos in adjacency_list:
-                                                adjacency_list[agent.pos].append(n.pos)
-                                            else:
-                                                adjacency_list[agent.pos] = [n.pos]
-                                    # Node edeges for Road Facing Up
-                                    elif(agent.direction == "Up"):
-                                        # Get 2nd and 4th neighbors
-                                        if(n.pos[0] == agent.pos[0] + 1 or n.pos[0] == agent.pos[0] - 1):
-                                            if(n.direction != agent.direction or isinstance(n, Traffic_Light) or isinstance(n, Destination)):
-                                                if agent.pos in adjacency_list:
-                                                    adjacency_list[agent.pos].append(n.pos)
-                                                else:
-                                                    adjacency_list[agent.pos] = [n.pos]
-                                        # # Get 3rd neighbor
-                                        elif(n.pos[1] == agent.pos[1]-1):
-                                            pass
-                                        # Get 1st neighbor
-                                        elif(n.pos[1] == agent.pos[1]+1):
-                                            if agent.pos in adjacency_list:
-                                                adjacency_list[agent.pos].append(n.pos)
-                                            else:
-                                                adjacency_list[agent.pos] = [n.pos]
-                                    
-                                    # Node edeges for Road Facing Down
-                                    elif(agent.direction == "Down"):
-                                        # Get 2nd and 4th neighbors
-                                        if(n.pos[0] == agent.pos[0] + 1 or n.pos[0] == agent.pos[0] - 1):
-                                            if(n.direction != agent.direction or isinstance(n, Traffic_Light) or isinstance(n, Destination)):
-                                                if agent.pos in adjacency_list:
-                                                    adjacency_list[agent.pos].append(n.pos)
-                                                else:
-                                                    adjacency_list[agent.pos] = [n.pos]
-                                        # # Get 3rd neighbor
-                                        elif(n.pos[1] == agent.pos[1]+1):
-                                            pass
-                                        # Get 3rd neighbor
-                                        elif(n.pos[1] == agent.pos[1]-1):
-                                            if agent.pos in adjacency_list:
-                                                adjacency_list[agent.pos].append(n.pos)
-                                            else:
-                                                adjacency_list[agent.pos] = [n.pos]
-                                elif isinstance(n, Traffic_Light):
-                                    if agent.pos in adjacency_list:
-                                        adjacency_list[agent.pos].append(n.pos)
-                                    else:
-                                        adjacency_list[agent.pos] = [n.pos]
-                                elif isinstance(n, Destination):
-                                    if agent.pos in adjacency_list:
-                                        adjacency_list[agent.pos].append(n.pos)
-                                    else:
-                                        adjacency_list[agent.pos] = [n.pos]
-                                else:
-                                    pass
-
-                    elif isinstance(agent, Traffic_Light):
-                        neighbors = self.grid.get_neighbors(agent.pos, moore = False, include_center = False)
-                        for n in neighbors:
-                            if n:
-                                if isinstance(n, Road):
-                                    # Get 1st neighbor
-                                    if(n.pos[1] == agent.pos[1] + 1):
-                                        if(n.direction != "Down"):
-                                            if agent.pos in adjacency_list:
-                                                adjacency_list[agent.pos].append(n.pos)
-                                            else:
-                                                adjacency_list[agent.pos] = [n.pos]
-                                    # Get 3rd neighbor
-                                    elif(n.pos[1] == agent.pos[1] - 1):
-                                        if(n.direction != "Up"):
-                                            if agent.pos in adjacency_list:
-                                                adjacency_list[agent.pos].append(n.pos)
-                                            else:
-                                                adjacency_list[agent.pos] = [n.pos]
-                                    # Get 2nd neighbor
-                                    elif(n.pos[0] == agent.pos[0]+1):
-                                       if(n.direction != "Left"):
-                                            if agent.pos in adjacency_list:
-                                                adjacency_list[agent.pos].append(n.pos)
-                                            else:
-                                                adjacency_list[agent.pos] = [n.pos]
-                                    # Get 4th neighbor
-                                    elif(n.pos[0] == agent.pos[0]-1):
-                                        if(n.direction != "Right"):
-                                            if agent.pos in adjacency_list:
-                                                adjacency_list[agent.pos].append(n.pos)
-                                            else:
-                                                adjacency_list[agent.pos] = [n.pos]
-                    else:
-                        pass
-                    
-        return adjacency_list
-
 
     def step(self):
         '''Advance the model by one step.'''
         if self.schedule.steps % 10 == 0:
             for agent in self.traffic_lights:
                 agent.state = not agent.state
+
+        if(self.schedule.steps % 10 == 0 and self.num_agents > 0):
+            rand_dest = self.random.choice(self.destinations)
+            rand_corner = self.random.choice(self.corners)
+
+            car = Car(self.num_agents + 1000, self, rand_dest)
+            self.schedule.add(car)
+            self.grid.place_agent(car, rand_corner)
+
+            self.num_agents -= 1
+
         self.schedule.step()
