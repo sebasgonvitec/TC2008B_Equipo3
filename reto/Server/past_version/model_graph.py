@@ -207,9 +207,9 @@ class RandomModel(Model):
         
         # Create car agent and randomly asign destination
         # rand_dest = self.random.choice(self.destinations)
-        # car = Car(1337, self, rand_dest)
+        # car = Car(1337, self, (21, 5))
         # self.schedule.add(car)
-        # self.grid.place_agent(car, (0,1))
+        # self.grid.place_agent(car, (0,0))
 
         #print(self.create_adjacency_list())
         self.graph = Graph(self.create_adjacency_list(), self)
@@ -235,10 +235,47 @@ class RandomModel(Model):
                     for n in neighbors:
                         if(not isinstance(n, Obstacle)):
                             if(n.pos[self.directions[agent.direction][0]] == agent.pos[self.directions[agent.direction][0]] + self.directions[agent.direction][1]):
-                                if(agent.pos in adjacency_list):
-                                    adjacency_list[agent.pos].append(n.pos)
+                                if(self.directions[agent.direction][0] == 0):
+                                    if(n.pos[1] == agent.pos[1]-1 and isinstance(n, Road) and n.direction != "Up"):
+                                        if(agent.pos in adjacency_list):
+                                            adjacency_list[agent.pos].append(n.pos)
+                                        else:
+                                            adjacency_list[agent.pos] = [n.pos]
+                                    elif(n.pos[1] == agent.pos[1]+1 and isinstance(n, Road) and n.direction != "Down"):
+                                        if(agent.pos in adjacency_list):
+                                            adjacency_list[agent.pos].append(n.pos)
+                                        else:
+                                            adjacency_list[agent.pos] = [n.pos]
+                                    elif(n.pos[1] == agent.pos[1] and (isinstance(n, Traffic_Light) or isinstance(n, Road))):
+                                        if(agent.pos in adjacency_list):
+                                            adjacency_list[agent.pos].append(n.pos)
+                                        else:
+                                            adjacency_list[agent.pos] = [n.pos]
                                 else:
-                                    adjacency_list[agent.pos] = [n.pos]
+                                    if(n.pos[0] == agent.pos[0]-1 and isinstance(n, Road) and n.direction != "Right"):
+                                        if(agent.pos in adjacency_list):
+                                            adjacency_list[agent.pos].append(n.pos)
+                                        else:
+                                            adjacency_list[agent.pos] = [n.pos]
+                                    elif(n.pos[0] == agent.pos[0]+1 and isinstance(n, Road) and n.direction != "Left"):
+                                        if(agent.pos in adjacency_list):
+                                            adjacency_list[agent.pos].append(n.pos)
+                                        else:
+                                            adjacency_list[agent.pos] = [n.pos]
+                                    elif(n.pos[0] == agent.pos[0] and (isinstance(n, Traffic_Light) or isinstance(n, Road))):
+                                        if(agent.pos in adjacency_list):
+                                            adjacency_list[agent.pos].append(n.pos)
+                                        else:
+                                            adjacency_list[agent.pos] = [n.pos]
+                                if isinstance(n, Destination): 
+                                    if(agent.pos in adjacency_list):
+                                            adjacency_list[agent.pos].append(n.pos)
+                                    else:
+                                        adjacency_list[agent.pos] = [n.pos]
+                                # if(agent.pos in adjacency_list):
+                                #     adjacency_list[agent.pos].append(n.pos)
+                                # else:
+                                #     adjacency_list[agent.pos] = [n.pos]
                             # # Directly in front
                             # if(n.pos[self.directions[agent.direction][0]] == agent.pos[self.directions[agent.direction][0]] + self.directions[agent.direction][1] and n.pos[self.directions[agent.direction][0]] == agent.pos[self.directions[agent.direction][0]]):
                             #     if(agent.pos in adjacency_list):
