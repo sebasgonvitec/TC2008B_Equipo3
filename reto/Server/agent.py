@@ -59,11 +59,9 @@ class Car(Agent):
                                 if isinstance(side_agent, Car):
                                     self.moving = False
                                     return
-
-            for agent in next_move_contents:
-                if isinstance(agent, Car) and not agent.moving:
-                    self.moving = False
-                    return 
+                    elif isinstance(agent, Car) and not agent.moving:
+                        self.moving = False
+                        return 
 
             self.moving = True
             self.model.grid.move_agent(self, next_move)
@@ -225,22 +223,6 @@ class Road(Agent):
         """
         super().__init__(unique_id, model)
         self.direction = direction
-
-    def step(self):
-        pass
-
-class Intersection(Agent):
-    """
-    Intersection agent. Determines where the cars can move, and in which directions.
-    """
-    def __init__(self, unique_id, model, direction= "Left"):
-        """
-        Creates a new road.
-        Args:
-            unique_id: The agent's ID
-            model: Model reference for the agent
-        """
-        super().__init__(unique_id, model)
 
     def step(self):
         pass

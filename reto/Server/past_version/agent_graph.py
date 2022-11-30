@@ -20,33 +20,75 @@ class Car(Agent):
         self.destination = destination
         self.route = None
         self.calculated_route = False
+        self.moving = False
+
+        print("Cars destination: ", self.destination)
 
     def move(self):
         """
         Moves the agent to the next node in the route
         """
-        # if(self.pos == self.destination):
-        #     pass
-        # else:
-        #     next_move = self.route.pop(0)
-        #     self.model.grid.move_agent(self, next_move)
+        # Rules for Traffic Lights:
+        cell_contents = self.model.grid.get_cell_list_contents(self.pos)
+        for agent in cell_contents:
+            if isinstance(agent, Traffic_Light):
+                if agent.state == False:
+                    self.moving = False
+                    return
+                    
+        if(self.route):
+            next_move = self.route.pop(0)
+
+            # Rule for Car in next_move
+            next_move_contents = self.model.grid.get_cell_list_contents(next_move)
+            if(self.pos[0] != next_move[0] and self.pos[1] != next_move[1]):
+                for agent in next_move_contents:
+                    if isinstance(agent, Road):
+                        if agent.direction == "Left" or agent.direction == "Right":
+                            side_cell_contents = self.model.grid.get_cell_list_contents((self.pos[0], next_move[1]))
+                            for side_agent in side_cell_contents:
+                                if isinstance(side_agent, Car):
+                                    self.moving = False
+                                    return
+                        else:
+                            side_cell_contents = self.model.grid.get_cell_list_contents((self.pos[1], next_move[0]))
+                            for side_agent in side_cell_contents:
+                                if isinstance(side_agent, Car):
+                                    self.moving = False
+                                    return
+            for agent in next_move_contents:
+                if isinstance(agent, Car) and not agent.moving:
+                    self.moving = False
+                    return 
+
+            self.moving = True
+            self.model.grid.move_agent(self, next_move)
+        else:
+            self.model.grid.remove_agent(self)
+            self.model.schedule.remove(self)
 
     def step(self):
         """ 
         Determines the new direction it will take, and then moves
         """
-        # if(not self.calculated_route):
-        #     self.route = self.get_route()
-        #     self.calculated_route = True
-        #     self.move()
-        # else: 
-        #     self.move()
+        if not self.calculated_route:
+            self.route = self.get_route_bfs()
+            self.calculated_route = True
+            self.move()
+        else:
+            self.move()
     
     def get_route(self):
         """
+        Determines the route that the agent will take using BFS
+        """
+        return self.model.graph.a_star_algorithm(self.pos, self.destination)        
+        
+    def get_route_bfs(self):
+        """
         Determines the route that the agent will take
         """
-        #return self.model.graph.a_star_algorithm(self.pos, self.destination)
+        return self.model.graph.bfs(self.pos, self.destination)
 
 class Traffic_Light(Agent):
     """
@@ -107,22 +149,6 @@ class Road(Agent):
         """
         super().__init__(unique_id, model)
         self.direction = direction
-
-    def step(self):
-        pass
-
-class Intersection(Agent):
-    """
-    Intersection agent. Determines where the cars can move, and in which directions.
-    """
-    def __init__(self, unique_id, model, direction= "Left"):
-        """
-        Creates a new road.
-        Args:
-            unique_id: The agent's ID
-            model: Model reference for the agent
-        """
-        super().__init__(unique_id, model)
 
     def step(self):
         pass
