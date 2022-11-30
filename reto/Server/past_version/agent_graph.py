@@ -28,44 +28,48 @@ class Car(Agent):
         """
         Moves the agent to the next node in the route
         """
-        # Rules for Traffic Lights:
-        cell_contents = self.model.grid.get_cell_list_contents(self.pos)
-        for agent in cell_contents:
-            if isinstance(agent, Traffic_Light):
-                if agent.state == False:
-                    self.moving = False
-                    return
-                    
         if(self.route):
-            next_move = self.route.pop(0)
+            next_move = self.route[0]
+        cell_contents = self.model.grid.get_cell_list_contents(next_move)
+        print(cell_contents)
+        # Rules for Traffic Lights:
+        # cell_contents = self.model.grid.get_cell_list_contents(self.pos)
+        # for agent in cell_contents:
+        #     if isinstance(agent, Traffic_Light):
+        #         if agent.state == False:
+        #             self.moving = False
+        #             return
+                    
+        # if(self.route):
+        #     next_move = self.route.pop(0)
 
-            # Rule for Car in next_move
-            next_move_contents = self.model.grid.get_cell_list_contents(next_move)
-            if(self.pos[0] != next_move[0] and self.pos[1] != next_move[1]):
-                for agent in next_move_contents:
-                    if isinstance(agent, Road):
-                        if agent.direction == "Left" or agent.direction == "Right":
-                            side_cell_contents = self.model.grid.get_cell_list_contents((self.pos[0], next_move[1]))
-                            for side_agent in side_cell_contents:
-                                if isinstance(side_agent, Car):
-                                    self.moving = False
-                                    return
-                        else:
-                            side_cell_contents = self.model.grid.get_cell_list_contents((self.pos[1], next_move[0]))
-                            for side_agent in side_cell_contents:
-                                if isinstance(side_agent, Car):
-                                    self.moving = False
-                                    return
-            for agent in next_move_contents:
-                if isinstance(agent, Car) and not agent.moving:
-                    self.moving = False
-                    return 
+        #     # Rule for Car in next_move
+        #     next_move_contents = self.model.grid.get_cell_list_contents(next_move)
+        #     if(self.pos[0] != next_move[0] and self.pos[1] != next_move[1]):
+        #         for agent in next_move_contents:
+        #             if isinstance(agent, Road):
+        #                 if agent.direction == "Left" or agent.direction == "Right":
+        #                     side_cell_contents = self.model.grid.get_cell_list_contents((self.pos[0], next_move[1]))
+        #                     for side_agent in side_cell_contents:
+        #                         if isinstance(side_agent, Car):
+        #                             self.moving = False
+        #                             return
+        #                 else:
+        #                     side_cell_contents = self.model.grid.get_cell_list_contents((self.pos[1], next_move[0]))
+        #                     for side_agent in side_cell_contents:
+        #                         if isinstance(side_agent, Car):
+        #                             self.moving = False
+        #                             return
+        #     for agent in next_move_contents:
+        #         if isinstance(agent, Car) and not agent.moving:
+        #             self.moving = False
+        #             return 
 
-            self.moving = True
-            self.model.grid.move_agent(self, next_move)
-        else:
-            self.model.grid.remove_agent(self)
-            self.model.schedule.remove(self)
+        #     self.moving = True
+        #     self.model.grid.move_agent(self, next_move)
+        # else:
+        #     self.model.grid.remove_agent(self)
+        #     self.model.schedule.remove(self)
 
     def step(self):
         """ 
