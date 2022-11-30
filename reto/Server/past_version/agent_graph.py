@@ -17,7 +17,7 @@ class Car(Agent):
             destination: Coordinates of the destination
         """
         super().__init__(unique_id, model)
-        self.destination = destination
+        self.destination = (21,5)#destination
         self.route = None
         self.calculated_route = False
         self.moving = False

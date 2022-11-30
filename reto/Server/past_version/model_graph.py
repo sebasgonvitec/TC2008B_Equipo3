@@ -133,7 +133,7 @@ class Graph:
                         if isinstance(agent, Traffic_Light):
                             for curr_agent in curr_cell_contents:
                                 if isinstance(curr_agent, Road) and agent.pos[self.model.directions[curr_agent.direction][2]] == curr_agent.pos[self.model.directions[curr_agent.direction][2]]:
-                                    print("Found traffic light in same direction")
+                                    #print("Found traffic light in same direction")
                                     queue.append(i)
                                     visited.add(i)
                                     parents[i] = s
@@ -147,8 +147,7 @@ class Graph:
                                     queue.append(i)
                                     visited.add(i)
                                     parents[i] = s
-                            
-                    
+                                 
         print("No path found")
         return None
         
