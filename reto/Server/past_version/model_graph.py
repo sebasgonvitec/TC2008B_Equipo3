@@ -165,6 +165,7 @@ class RandomModel(Model):
         self.destinations = []
         self.graph = None
         self.directions = {
+            #(eje de relevancia, hacia que direccion,contrario eje de relevancia)
             "Up": (1,1,0),
             "Down": (1,-1,0),
             "Right": (0,1,1),
@@ -223,7 +224,7 @@ class RandomModel(Model):
         """
         Returns a dictionary of the adjacency list of the grid.
         """
-        adjacency_list = {}
+        adjacency_list = {} # position of node : [list of possible steps in coords]
 
         for cell in self.grid.coord_iter():
             cell_content, x, y = cell
@@ -233,7 +234,11 @@ class RandomModel(Model):
                     neighbors = self.grid.get_neighbors(agent.pos, moore = True, include_center = False)
                     for n in neighbors:
                         if(not isinstance(n, Obstacle)):
+                            #Check that the neighbor is of interest (is in the front row relative to direction)
                             if(n.pos[self.directions[agent.direction][0]] == agent.pos[self.directions[agent.direction][0]] + self.directions[agent.direction][1]):
+                                
+                                #Conditions to check special cases like v>> where some of the front row tiles shouldnt be considered
+                                #Condition to only add traffic lights directly in front of you (not diagonals)
                                 if(self.directions[agent.direction][0] == 0):
                                     if(n.pos[1] == agent.pos[1]-1 and isinstance(n, Road) and n.direction != "Up"):
                                         if(agent.pos in adjacency_list):
@@ -299,6 +304,7 @@ class RandomModel(Model):
                             #             else:
                             #                 adjacency_list[agent.pos] = [n.pos]
                 
+                #Traffic lights adds all of its neighbors minus obstacles (graph takes care of the shortest path according to connections)
                 elif isinstance(agent, Traffic_Light):
                     neighbors = self.grid.get_neighbors(agent.pos, moore = True, include_center = False)
                     for n in neighbors:
