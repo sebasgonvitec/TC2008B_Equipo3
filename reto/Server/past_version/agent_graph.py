@@ -21,6 +21,7 @@ class Car(Agent):
         self.route = None
         self.calculated_route = False
         self.moving = False
+        self.next_move = None
 
         print("Cars destination: ", self.destination)
 
@@ -28,10 +29,25 @@ class Car(Agent):
         """
         Moves the agent to the next node in the route
         """
+        # TODO: Behaviour for car evasion
+        # TODO: Behaviour for traffic lights
+        
         if(self.route):
-            next_move = self.route[0]
-        cell_contents = self.model.grid.get_cell_list_contents(next_move)
-        print(cell_contents)
+            next_move_contents = self.model.grid.get_cell_list_contents([self.next_move])
+            for agent in next_move_contents:
+                if isinstance(agent, Car):
+                    print("There is a car in the next move", self.next_move)
+                    return
+                if isinstance(agent, Traffic_Light) and not agent.state:
+                    print("There is a traffic light in the next move")
+                    return
+            self.model.grid.move_agent(self, self.next_move)
+            self.next_move = self.route.pop(0)
+        else:
+            self.model.grid.move_agent(self, self.next_move)
+            self.model.grid.remove_agent(self)
+            self.model.schedule.remove(self)
+            
         # Rules for Traffic Lights:
         # cell_contents = self.model.grid.get_cell_list_contents(self.pos)
         # for agent in cell_contents:
@@ -77,6 +93,7 @@ class Car(Agent):
         """
         if not self.calculated_route:
             self.route = self.get_route_bfs()
+            self.next_move = self.route.pop(0)
             self.calculated_route = True
             self.move()
         else:
@@ -92,7 +109,9 @@ class Car(Agent):
         """
         Determines the route that the agent will take
         """
-        return self.model.graph.bfs(self.pos, self.destination)
+        route = self.model.graph.bfs(self.pos, self.destination)
+        route.pop(0)
+        return route
 
 class Traffic_Light(Agent):
     """
