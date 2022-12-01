@@ -332,14 +332,51 @@ class RandomModel(Model):
             for agent in self.traffic_lights:
                 agent.state = not agent.state
 
-        if(self.schedule.steps % 1 == 0 and self.num_agents > 0):
-            rand_dest = self.random.choice(self.destinations)
-            rand_corner = self.random.choice(self.corners)
+        if(self.schedule.steps % 3 == 0 and self.num_agents > 0):
+            if(self.num_agents > 0):
+                # rand_dest = self.random.choice(self.destinations)
+                # rand_corner = self.random.choice(self.corners)
 
-            car = Car(self.num_agents + 1000, self, rand_dest)
-            self.schedule.add(car)
-            self.grid.place_agent(car, rand_corner)
+                # car = Car(self.num_agents + 1000, self, rand_dest)
+                # self.schedule.add(car)
+                # self.grid.place_agent(car, rand_corner)
 
-            self.num_agents -= 1
+                # self.num_agents -= 1
+                
+                rand_dest = self.random.choice(self.destinations)
+                rand_corner = self.corners[0]
+
+                car = Car(self.num_agents + 1000, self, rand_dest)
+                self.schedule.add(car)
+                self.grid.place_agent(car, rand_corner)
+
+                self.num_agents -= 1
+
+                rand_dest = self.random.choice(self.destinations)
+                rand_corner = self.corners[1]
+
+                car = Car(self.num_agents + 1000, self, rand_dest)
+                self.schedule.add(car)
+                self.grid.place_agent(car, rand_corner)
+
+                self.num_agents -= 1
+
+                rand_dest = self.random.choice(self.destinations)
+                rand_corner = self.corners[2]
+
+                car = Car(self.num_agents + 1000, self, rand_dest)
+                self.schedule.add(car)
+                self.grid.place_agent(car, rand_corner)
+
+                self.num_agents -= 1
+
+                rand_dest = self.random.choice(self.destinations)
+                rand_corner = self.corners[3]
+
+                car = Car(self.num_agents + 1000, self, rand_dest)
+                self.schedule.add(car)
+                self.grid.place_agent(car, rand_corner)
+
+                self.num_agents -= 1
 
         self.schedule.step()

@@ -1,4 +1,5 @@
 from mesa import Agent
+import random
 
 class Car(Agent):
     # TODO: Add beheavior for obstacle and car evasion 
@@ -42,7 +43,7 @@ class Car(Agent):
 
             for agent in next_move_contents:
 
-                if activate_alternative:
+                if isinstance(agent, Car):
                     print("There is a car in the next move", self.next_move)
                     neighbors = self.model.grid.get_neighbors(self.pos, moore = True, include_center = False)
                     curr_contents = self.model.grid.get_cell_list_contents([self.pos])
@@ -51,10 +52,9 @@ class Car(Agent):
                         if(isinstance(agent, Road)):
                             front_neighbors =[]
                             for n in neighbors:
-                                # if(isinstance(n, Car)):
-                                #     if(n.pos[self.model.directions[agent.direction][0]] == self.pos[self.model.directions[agent.direction][0]]):
-                                #         self.prevPos = self.pos
-                                #         return
+                                if(isinstance(n, Car)):
+                                    if(n.pos[self.model.directions[agent.direction][0]] == self.pos[self.model.directions[agent.direction][0]]):
+                                        return
                                 if(not isinstance(n, Obstacle)):
                                     if(n.pos[self.model.directions[agent.direction][0]] == self.pos[self.model.directions[agent.direction][0]] + self.model.directions[agent.direction][1]):
                                         front_neighbors.append(n.pos)
@@ -71,10 +71,10 @@ class Car(Agent):
                                 for agent in alternative_contents:
                                     if isinstance(agent, Car):
                                         print("There is a car in the next move", alternative)
-                                        self.prevPos = self.pos
                                         return
                                     else:
-                                        self.next_move = alternative
+                                        if random.randint(0, 20) < 15:
+                                            self.next_move = alternative
 
                 if isinstance(agent, Traffic_Light) and not agent.state:
                     print("There is a traffic light in the next move")

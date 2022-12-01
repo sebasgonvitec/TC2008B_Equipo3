@@ -401,7 +401,7 @@ MonoBehaviour:
   - {fileID: 2315625056885201833, guid: 87e1991ed6cea9f4bb231619497ea01d, type: 3}
   trafficGreenPrefab: {fileID: 4054346511697783545, guid: 7d94435e38495bc49961b819619f3167, type: 3}
   trafficRedPrefab: {fileID: 4054346511697783545, guid: fc02498e7d296d14e949ecbb8ba75786, type: 3}
-  NCars: 200
+  NCars: 1000
   timeToUpdate: 0.5
 --- !u!4 &1377293776
 Transform:

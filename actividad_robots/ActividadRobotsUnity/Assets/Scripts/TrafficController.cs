@@ -133,7 +133,8 @@ public class TrafficController : MonoBehaviour // Class agent controller
     // update
     private void Update()
     {
-        
+         Debug.Log("Number of simultaneous cars: " + cars.Count);       
+
         if (timer < 0)
         {
             timer = timeToUpdate;
