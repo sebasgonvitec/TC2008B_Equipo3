@@ -31,7 +31,7 @@ app = Flask("Traffic Visualization")
 def initModel():
     global currentStep, randomModel, number_cars
     if request.method == 'POST':
-        number_cars = int(request.form.get('NAgents'))
+        number_cars = int(request.form.get('NCars'))
         currentStep = 0
 
         #print(request.form)
