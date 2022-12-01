@@ -104,7 +104,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3065073497169282227}
   m_Layer: 0
-  m_Name: Cop_Prefab
+  m_Name: car3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -288,7 +288,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: ce50a2ebc57a7c6438f3131f70403b11, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 9b0b8fc7c72642f42a6ab26d838f4a23, type: 2}
+      objectReference: {fileID: 2100000, guid: 2aff01cc382d8f34bb5956c697ee83fc, type: 2}
     - target: {fileID: -7511558181221131132, guid: ce50a2ebc57a7c6438f3131f70403b11, type: 3}
       propertyPath: m_Materials.Array.data[1]
       value: 
@@ -296,11 +296,11 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: ce50a2ebc57a7c6438f3131f70403b11, type: 3}
       propertyPath: m_Materials.Array.data[2]
       value: 
-      objectReference: {fileID: 2100000, guid: c795cb7ecf043d047972b17fdf6b2e1a, type: 2}
+      objectReference: {fileID: 2100000, guid: 995162b665755714a97c9a68ab63f9eb, type: 2}
     - target: {fileID: -7511558181221131132, guid: ce50a2ebc57a7c6438f3131f70403b11, type: 3}
       propertyPath: m_Materials.Array.data[3]
       value: 
-      objectReference: {fileID: 2100000, guid: 45e8a12f9d749ca49929c13e4e2c8b00, type: 2}
+      objectReference: {fileID: 2100000, guid: 995162b665755714a97c9a68ab63f9eb, type: 2}
     - target: {fileID: -7511558181221131132, guid: ce50a2ebc57a7c6438f3131f70403b11, type: 3}
       propertyPath: m_Materials.Array.data[4]
       value: 
