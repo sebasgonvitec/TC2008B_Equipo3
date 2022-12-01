@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1794856881026534445
+--- !u!1 &3619276525850143605
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,42 +8,42 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2328181718940561704}
-  - component: {fileID: 8561543784735010213}
+  - component: {fileID: 5226050306077370871}
+  - component: {fileID: 7551653662198086673}
   m_Layer: 0
-  m_Name: Spot Light
+  m_Name: RedLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2328181718940561704
+--- !u!4 &5226050306077370871
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1794856881026534445}
+  m_GameObject: {fileID: 3619276525850143605}
   m_LocalRotation: {x: 0.4731468, y: -0.5254827, z: -0.5254827, w: 0.4731468}
-  m_LocalPosition: {x: 0.2, y: 3.12, z: 0.28}
+  m_LocalPosition: {x: 0.141, y: 2.562, z: 0.28}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6911573814503004166}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: -6, y: -90, z: -90}
---- !u!108 &8561543784735010213
+--- !u!108 &7551653662198086673
 Light:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1794856881026534445}
+  m_GameObject: {fileID: 3619276525850143605}
   m_Enabled: 1
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 0.5585476, g: 0.8509804, b: 0.40392157, a: 1}
+  m_Color: {r: 0.8509804, g: 0.40392157, b: 0.46307808, a: 1}
   m_Intensity: 5
   m_Range: 6
   m_SpotAngle: 30
@@ -104,7 +104,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6911573814503004166}
   m_Layer: 0
-  m_Name: TrafficLight_Prefab
+  m_Name: RedLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -123,7 +123,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4865173671748744657}
-  - {fileID: 2328181718940561704}
+  - {fileID: 5226050306077370871}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

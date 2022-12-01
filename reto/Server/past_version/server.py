@@ -12,7 +12,7 @@ Autores: Sebastián González, A01029746
 from flask import Flask, request, jsonify
 from mesa import Agent, Model
 from mesa.space import MultiGrid
-from agent_graph import Car
+from agent_graph import Car, Traffic_Light
 from model_graph import RandomModel
 
 # Size of the board:
@@ -56,6 +56,23 @@ def getCars():
 
         # print("Agents Positions: ", robotPositions)
         return jsonify({'positions':carPositions})
+
+
+# Endpoint for traffic light state
+@app.route('/getTrafficLight', methods=['GET'])
+def getTrafficLight():
+    global randomModel
+
+    if request.method == 'GET':
+        lightStates = []
+        for cell in randomModel.grid.coord_iter():
+            cell_content, x, z = cell
+            if cell_content:
+                for agent in cell_content:
+                    if isinstance(agent, Traffic_Light):
+                        lightStates.append({"id": str(agent.unique_id), "x": x, "y": 1, "z": z, "state": str(agent.state)})
+
+        return jsonify({'trafficLightsList': lightStates})
 
 # Endpoint for update
 @app.route('/update', methods=['GET'])

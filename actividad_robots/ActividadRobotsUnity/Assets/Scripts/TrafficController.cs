@@ -24,7 +24,6 @@ public class CarData // Class for agent data
 }
 
 [Serializable]
-
 public class CarsData // agents data 
 {
     public List<CarData> positions;
@@ -45,6 +44,35 @@ public class CarsData // agents data
 
 }
 
+
+[Serializable]
+public class TrafficLight // Class for agent data
+{
+    // Attributes
+    public string id;
+    public float x, y, z;
+    public string state;
+
+    public TrafficLight(string id, float x, float y, float z, string state)
+    {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.state = state;
+
+    }
+}
+
+[Serializable]
+public class TrafficLights // agents data 
+{
+    public List<TrafficLight> trafficLightsList;
+
+    public TrafficLights() => this.trafficLightsList = new List<TrafficLight>();
+}
+
+
 public class TrafficController : MonoBehaviour // Class agent controller
 {
     // private string url = "https://agents.us-south.cf.appdomain.cloud/";
@@ -52,21 +80,25 @@ public class TrafficController : MonoBehaviour // Class agent controller
     // Endpoints
     string serverUrl = "http://localhost:8585";
     string getCarsEndpoint = "/getCars";
+    string getTrafficLightEndpoint = "/getTrafficLight";
     string sendConfigEndpoint = "/init";
     string updateEndpoint = "/update";
     
     // Data instances
     CarsData carsData;
+    TrafficLights trafficData;
     
     // Dictionaries for agents and positions
-    Dictionary<string, GameObject> cars;
+    Dictionary<string, GameObject> cars, trafficGreenLights, trafficRedLights;
     Dictionary<string, Vector3> prevPositions, currPositions;
+    Dictionary<string, string> prevState;
 
     // Simulation states
     bool updated = false, started = false, finished = false;
 
     // Prefabs
     public List<GameObject> carList;
+    public GameObject trafficGreenPrefab, trafficRedPrefab;
     GameObject carPrefab;
 
     // params
@@ -80,6 +112,7 @@ public class TrafficController : MonoBehaviour // Class agent controller
     {
         // initialize data
         carsData = new CarsData();
+        trafficData = new TrafficLights();
 
         // Positions dictionaries
         prevPositions = new Dictionary<string, Vector3>();
@@ -87,6 +120,10 @@ public class TrafficController : MonoBehaviour // Class agent controller
 
         // agents dictionary
         cars = new Dictionary<string, GameObject>();
+        
+        trafficGreenLights = new Dictionary<string, GameObject>();
+        trafficRedLights = new Dictionary<string, GameObject>();
+        prevState = new Dictionary<string, string>();
 
         timer = timeToUpdate;
         // Send configuration coroutine
@@ -140,6 +177,7 @@ public class TrafficController : MonoBehaviour // Class agent controller
         else
         {
             // Start coroutines
+            StartCoroutine(GetTrafficLightsData());
             StartCoroutine(GetCarsData());
         }
     }
@@ -163,6 +201,7 @@ public class TrafficController : MonoBehaviour // Class agent controller
         {
             Debug.Log("Configuration upload complete!");
             Debug.Log("Getting Agents positions");
+            StartCoroutine(GetTrafficLightsData());
             StartCoroutine(GetCarsData());
            
         }
@@ -195,7 +234,7 @@ public class TrafficController : MonoBehaviour // Class agent controller
 
             foreach (CarData agent in carsData.positions)
             {
-                Vector3 newAgentPosition = new Vector3(agent.x * 4, agent.y, agent.z * 4);
+                Vector3 newAgentPosition = new Vector3(agent.x * 4, agent.y, agent.z * 4 - 5);
 
                 if (!prevPositions.ContainsKey(agent.id))
                 {
@@ -212,6 +251,57 @@ public class TrafficController : MonoBehaviour // Class agent controller
                 }
             }
             updated = true;
+        }
+    }
+
+    IEnumerator GetTrafficLightsData()
+    {
+        UnityWebRequest www = UnityWebRequest.Get(serverUrl + getTrafficLightEndpoint);
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+            Debug.Log(www.error);
+        else
+        {
+            trafficData = JsonUtility.FromJson<TrafficLights>(www.downloadHandler.text);
+        
+            foreach (TrafficLight agent in trafficData.trafficLightsList)
+            {
+                Vector3 newAgentPosition = new Vector3(agent.x * 4, agent.y, agent.z * 4 - 5);
+            
+                if (!trafficGreenLights.ContainsKey(agent.id))
+                {
+                    prevState[agent.id] = agent.state;
+
+                    if(agent.state == "False"){
+                        trafficRedLights[agent.id] = Instantiate(trafficRedPrefab, newAgentPosition, Quaternion.Euler(0, 90, 0));
+                        trafficGreenLights[agent.id] = Instantiate(trafficGreenPrefab, newAgentPosition, Quaternion.Euler(0, 90, 0));
+                        trafficGreenLights[agent.id].SetActive(false);
+                    }   
+                    else if(agent.state == "True"){
+                        trafficRedLights[agent.id] = Instantiate(trafficRedPrefab, newAgentPosition, Quaternion.identity);
+                        trafficGreenLights[agent.id] = Instantiate(trafficGreenPrefab, newAgentPosition, Quaternion.identity);
+                        trafficRedLights[agent.id].SetActive(false);
+                    }   
+                }
+                else
+                {
+                    if(prevState[agent.id] != agent.state && agent.state == "False"){
+                        trafficGreenLights[agent.id].SetActive(false);
+                        trafficRedLights[agent.id].SetActive(true);
+                        prevState[agent.id] = agent.state;
+
+                    }
+                    else if(prevState[agent.id] != agent.state && agent.state == "True"){
+                        trafficRedLights[agent.id].SetActive(false);
+                        trafficGreenLights[agent.id].SetActive(true);
+                        prevState[agent.id] = agent.state;
+
+                    }
+        
+                }
+            }
+            // updated = true;
         }
     }
 
