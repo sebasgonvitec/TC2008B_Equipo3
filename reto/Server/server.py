@@ -1,58 +1,87 @@
-from agent import *
-from model import RandomModel
-from mesa.visualization.modules import CanvasGrid, BarChartModule
-from mesa.visualization.ModularVisualization import ModularServer
+"""
+Python Flask server for connection with Unity
+15-11-2022
 
-def agent_portrayal(agent):
-    if agent is None: return
-    
-    portrayal = {"Shape": "rect",
-                 "Filled": "true",
-                 "Layer": 1,
-                 "w": 1,
-                 "h": 1
-                 }
+Autores: Sebastián González, A01029746
+         Andreína Sanánez, A01024927
+         Karla Mondragón, A01025108
+         Ana Paula Katsuda, A01025303
+"""
 
-    if (isinstance(agent, Car)):
-        portrayal["Color"] = "blue"
-        portrayal["Layer"] = 1
+# Imports
+from flask import Flask, request, jsonify
+from mesa import Agent, Model
+from mesa.space import MultiGrid
+from agent_graph import Car, Traffic_Light
+from model_graph import RandomModel
 
-    if (isinstance(agent, Road)):
-        portrayal["Color"] = "grey"
-        portrayal["Layer"] = 0
-    
-    if (isinstance(agent, Destination)):
-        portrayal["Color"] = "lightgreen"
-        portrayal["Layer"] = 0
+# Size of the board:
+number_cars = 20
 
-    if (isinstance(agent, Traffic_Light)):
-        portrayal["Color"] = "red" if not agent.state else "green"
-        portrayal["Layer"] = 0
-        portrayal["w"] = 0.8
-        portrayal["h"] = 0.8
 
-    if (isinstance(agent, Obstacle)):
-        portrayal["Color"] = "cadetblue"
-        portrayal["Layer"] = 0
-        portrayal["w"] = 0.8
-        portrayal["h"] = 0.8
+randomModel = None
+currentStep = 0
 
-    return portrayal
+app = Flask("Traffic Visualization")
 
-width = 0
-height = 0
+# @app.route('/', methods=['POST', 'GET'])
 
-with open('2022_base.txt') as baseFile:
-    lines = baseFile.readlines()
-    width = len(lines[0])-1
-    height = len(lines)
+# initialize endpoint
+@app.route('/init', methods=['POST', 'GET'])
+def initModel():
+    global currentStep, randomModel, number_cars
+    if request.method == 'POST':
+        number_cars = int(request.form.get('NCars'))
+        currentStep = 0
 
-model_params = {"N":20}
+        #print(request.form)
+        #print(number_agents, width, height)
+        randomModel = RandomModel(number_cars)
 
-print(width, height)
-grid = CanvasGrid(agent_portrayal, width, height, 500, 500)
+        return jsonify({"message":"Parameters recieved, model initiated."})
 
-server = ModularServer(RandomModel, [grid], "Traffic Base", model_params)
-                       
-server.port = 8521 # The default
-server.launch()
+# Endpoint for cars
+@app.route('/getCars', methods=['GET'])
+def getCars():
+    global randomModel
+
+    if request.method == 'GET':
+        carPositions = []
+        for cell in randomModel.grid.coord_iter():
+            cell_content, x, z = cell
+            if cell_content:
+                for agent in cell_content:
+                    if isinstance(agent, Car):
+                        carPositions.append({"id": str(agent.unique_id), "x": x, "y": 1, "z": z})
+
+        # print("Agents Positions: ", robotPositions)
+        return jsonify({'positions':carPositions})
+
+
+# Endpoint for traffic light state
+@app.route('/getTrafficLight', methods=['GET'])
+def getTrafficLight():
+    global randomModel
+
+    if request.method == 'GET':
+        lightStates = []
+        for cell in randomModel.grid.coord_iter():
+            cell_content, x, z = cell
+            if cell_content:
+                for agent in cell_content:
+                    if isinstance(agent, Traffic_Light):
+                        lightStates.append({"id": str(agent.unique_id), "x": x, "y": 1, "z": z, "state": str(agent.state)})
+
+        return jsonify({'trafficLightsList': lightStates})
+
+# Endpoint for update
+@app.route('/update', methods=['GET'])
+def updateModel():
+    global currentStep, randomModel
+    if request.method == 'GET':
+        randomModel.step()
+        currentStep += 1
+        return jsonify({'message':f'Model updated to step {currentStep}.', 'currentStep':currentStep})
+
+if __name__=='__main__':
+    app.run(host="localhost", port=8585, debug=True)

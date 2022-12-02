@@ -178,7 +178,7 @@ public class AgentController : MonoBehaviour // Class agent controller
                     Vector3 direction = currentPosition - interpolated;
 
                     agents[agent.Key].transform.localPosition = interpolated;
-                    //if (direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
+                    if (direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
                 }
             }
             

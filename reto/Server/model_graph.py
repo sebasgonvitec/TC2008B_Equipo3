@@ -11,99 +11,19 @@ class Graph:
     def __init__(self, adjacency_list, model):
         self.adjacency_list = adjacency_list
         self.model = model
-        print("Graphs adjacency list: ", self.adjacency_list)
+
 
     def get_neighbors(self, v):
+        """
+        Function to get the neighbors of a node in the adjacency list
+        """
         return self.adjacency_list[v]
 
-    # heuristic function with equal values for all nodes
-    def h(self, n):
-        H = {}
-        values = self.adjacency_list.values()
-        for value in values:
-            for node in value:
-                H[node] = 1
-
-        return H[n]
-
-    def a_star_algorithm(self, start_node, stop_node):
-        """
-        Determines the route that the agent will take using A*
-        """
-        # open_list is a list of nodes which have been visited, but who's neighbors
-        # haven't all been inspected, starts off with the start node
-        # closed_list is a list of nodes which have been visited
-        # and who's neighbors have been inspected
-        open_list = set([start_node])
-        closed_list = set([])
-
-        # g contains current distances from start_node to all other nodes
-        # the default value (if it's not found in the map) is +infinity
-        g = {}
-
-        g[start_node] = 0
-
-        # parents contains an adjacency map of all nodes
-        parents = {}
-        parents[start_node] = start_node
-
-        while len(open_list) > 0:
-            n = None
-
-            # find a node with the lowest value of f() - evaluation function
-            for v in open_list:
-                if n == None or g[v] + self.h(v) < g[n] + self.h(n):
-                    n = v;
-
-            if n == None:
-                print('Path does not exist!')
-                return None
-
-            # if the current node is the stop_node
-            # then we begin reconstructin the path from it to the start_node
-            if n == stop_node:
-                reconst_path = []
-                while parents[n] != n:
-                    reconst_path.append(n)
-                    n = parents[n]
-                reconst_path.append(start_node)
-                reconst_path.reverse()
-
-                print('Path found: {}'.format(reconst_path))
-                return reconst_path
-
-            # for all neighbors of the current node do
-            for (m) in self.get_neighbors(n):
-                # if the current node isn't in both open_list and closed_list
-                # add it to open_list and note n as it's parent
-                if m not in open_list and m not in closed_list:
-                    open_list.add(m)
-                    parents[m] = n
-                    g[m] = g[n] + 1
-                # otherwise, check if it's quicker to first visit n, then m
-                # and if it is, update parent data and g data
-                # and if the node was in the closed_list, move it to open_list
-                else:
-                    if g[m] > g[n] + 1:
-                        g[m] = g[n] + 1
-                        parents[m] = n
-
-                        if m in closed_list:
-                            closed_list.remove(m)
-                            open_list.add(m)
-            # remove n from the open_list, and add it to closed_list
-            # because all of his neighbors were inspected
-            open_list.remove(n)
-            closed_list.add(n)
-
-        print('Path does not exist!')
-        return None
 
     def bfs(self, start_node, stop_node):
         """
         Determines the route that the agent will take using BFS
         """
-        # Create a queue for BFS
         queue = deque()
         queue.append(start_node)
 
@@ -122,7 +42,7 @@ class Graph:
                     s = parents[s]
                 reconst_path.append(start_node)
                 reconst_path.reverse()
-                print('Path found: {}'.format(reconst_path))
+                #print('Path found: {}'.format(reconst_path))
                 return reconst_path
 
             for i in self.get_neighbors(s):
@@ -133,7 +53,6 @@ class Graph:
                         if isinstance(agent, Traffic_Light):
                             for curr_agent in curr_cell_contents:
                                 if isinstance(curr_agent, Road) and agent.pos[self.model.directions[curr_agent.direction][2]] == curr_agent.pos[self.model.directions[curr_agent.direction][2]]:
-                                    #print("Found traffic light in same direction")
                                     queue.append(i)
                                     visited.add(i)
                                     parents[i] = s
@@ -174,7 +93,6 @@ class RandomModel(Model):
         self.corners = []
 
         with open('2022_base.txt') as baseFile:
-        #with open('base_prueba.txt') as baseFile:
             lines = baseFile.readlines()
             self.width = len(lines[0])-1
             self.height = len(lines)
@@ -204,17 +122,8 @@ class RandomModel(Model):
                         self.grid.place_agent(agent, (c, self.height - r - 1))
 
         self.corners = [(0,0), (0, self.height - 1), (self.width - 1, 0), (self.width - 1, self.height - 1)]
-        
-        # Create car agent and randomly asign destination
-        # rand_dest = self.random.choice(self.destinations)
-        # car = Car(1337, self, (21, 5))
-        # self.schedule.add(car)
-        # self.grid.place_agent(car, (0,0))
-
-        #print(self.create_adjacency_list())
+    
         self.graph = Graph(self.create_adjacency_list(), self)
-        #print("Path to destination: ",self.graph.a_star_algorithm((0,1), (4,3)))
-        #self.graph.a_star_algorithm((6,1), (4,3))
 
         self.num_agents = N
         self.running = True
@@ -276,34 +185,7 @@ class RandomModel(Model):
                                             adjacency_list[agent.pos].append(n.pos)
                                     else:
                                         adjacency_list[agent.pos] = [n.pos]
-                                # if(agent.pos in adjacency_list):
-                                #     adjacency_list[agent.pos].append(n.pos)
-                                # else:
-                                #     adjacency_list[agent.pos] = [n.pos]
-                            # # Directly in front
-                            # if(n.pos[self.directions[agent.direction][0]] == agent.pos[self.directions[agent.direction][0]] + self.directions[agent.direction][1] and n.pos[self.directions[agent.direction][0]] == agent.pos[self.directions[agent.direction][0]]):
-                            #     if(agent.pos in adjacency_list):
-                            #         adjacency_list[agent.pos].append(n.pos)
-                            #     else:
-                            #         adjacency_list[agent.pos] = [n.pos]
-                            # # Sides of the agent
-                            # # TODO: check if conditions for when side is other direction are needed
-                            # if(n.pos[self.directions[agent.direction][2]] == agent.pos[self.directions[agent.direction][2]] and n.pos[self.directions[agent.direction][0]] == agent.pos[self.directions[agent.direction][0]]):
-                            #     if(not isinstance(n, Traffic_Light)):
-                            #         if(agent.pos in adjacency_list):
-                            #             adjacency_list[agent.pos].append(n.pos)
-                            #         else:
-                            #             adjacency_list[agent.pos] = [n.pos]
-
-                            # # Diagonals of the agent
-                            # if(n.pos[self.directions[agent.direction][0]] == agent.pos[self.directions[agent.direction][0]] + self.directions[agent.direction][1] and not (n.pos[self.directions[agent.direction][0]] == agent.pos[self.directions[agent.direction][0]])):
-                            #     if(isinstance(n, Road)):
-                            #         if(n.direction == agent.direction):
-                            #             if(agent.pos in adjacency_list):
-                            #                 adjacency_list[agent.pos].append(n.pos)
-                            #             else:
-                            #                 adjacency_list[agent.pos] = [n.pos]
-                
+                    
                 #Traffic lights adds all of its neighbors minus obstacles (graph takes care of the shortest path according to connections)
                 elif isinstance(agent, Traffic_Light):
                     neighbors = self.grid.get_neighbors(agent.pos, moore = True, include_center = False)
@@ -327,7 +209,9 @@ class RandomModel(Model):
         return adjacency_list
 
     def step(self):
-        '''Advance the model by one step.'''
+        """
+        Advance the model by one step.
+        """
         if self.schedule.steps % 10 == 0:
             for agent in self.traffic_lights:
                 agent.state = not agent.state

@@ -767,11 +767,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aca2cd022404af7479be752b793456d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentPrefab: {fileID: 3152113304158344830, guid: 3e240223ec6a6d3468c9a75705a8246b, type: 3}
-  obstaclePrefab: {fileID: 2474352897602398234, guid: edc9f3b8cc94aef43a5e8aa36d3a221c, type: 3}
+  agentPrefab: {fileID: 3309471959784529093, guid: d0978ef8caa077545a2560fe0ac43751, type: 3}
+  obstaclePrefab: {fileID: 4661152603640033058, guid: 1063b89382c61564dae05da3e2dc6fa1, type: 3}
   floor: {fileID: 1824225223}
   stationPrefab: {fileID: 961990229689801968, guid: 65dea3a5917e4ac4db93ec75dab8b95e, type: 3}
-  boxPrefab: {fileID: 8984637578724722113, guid: fd8fe1bd94d284046ad90beeb6750fc6, type: 3}
+  boxPrefab: {fileID: 8364663562184604448, guid: 4bdb7ed555307914ba04d7f3db96bc93, type: 3}
   timerText: {fileID: 543109660}
   NAgents: 10
   width: 15
