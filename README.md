@@ -48,4 +48,4 @@ Por último se corre la escena de Unity llamada "Warehouse"
 
 ---
 
-<span style="font-family:Monospace; font-size:4em;">Created with <3 by Andre, Akems, Karls & Sebas</span>
+<span style="font-family:monospace; font-size:3em;">Created with <3 by Andre, Akems, Karls & Sebas</span>
