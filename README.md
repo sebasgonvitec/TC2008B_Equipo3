@@ -7,7 +7,7 @@
 5. Sebastián González Villacorta - A01029746
 
 ## Actividad Integradora 2
----
+
 Durante esta actividad desarrollamos una simulación basada en agentes, del tráfico en una ciudad. Esta simulación incluye reglas de tránsito como sentidos de las calles, semáforos y permite que los coches naveguen a través de la ciudad evadiendo obstáculos y otros coches.
 
 ![Alt Text](https://github.com/sebasgonvitec/TC2008B_Equipo3/blob/main/models/Images/ezgif-3-c44e33516b.gif)
@@ -29,8 +29,6 @@ Por último se corre la escena de Unity llamada "TrafficBase"
 ---
 
 ## Actividad Integradora 1
-
----
 
 En esta actividad se desarrolló una simulación basada en agentes que consiste en robots dentro de un almacén que deben de recoger cajas en su ambiente y llevarlas a sus estaciones de carga siguiendo algunas condiciones como si la estación está llena y cuál es la estación más cercana.
 
