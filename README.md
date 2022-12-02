@@ -10,7 +10,7 @@
 ---
 Durante esta actividad desarrollamos una simulación basada en agentes, del tráfico en una ciudad. Esta simulación incluye reglas de tránsito como sentidos de las calles, semáforos y permite que los coches naveguen a través de la ciudad evadiendo obstáculos y otros coches.
 
-![Alt Text](models\Images\ezgif-3-c44e33516b.gif)
+![Alt Text](https://github.com/sebasgonvitec/TC2008B_Equipo3/blob/main/models/Images/ezgif-3-c44e33516b.gif)
 
 Para correr esta actividad primero se debe de abrir el proyecto de Unity ubicado en la carpeta:
 ```bash
@@ -24,7 +24,7 @@ Por último se corre la escena de Unity llamada "TrafficBase"
 
 [Manual de instalación](https://github.com/sebasgonvitec/TC2008B_Equipo3/blob/main/reto/manual.mp4)
 
-![Alt Text](models\Images\ezgif-3-e65fd56e96.gif)
+![Alt Text](https://github.com/sebasgonvitec/TC2008B_Equipo3/blob/main/models/Images/ezgif-3-e65fd56e96.gif)
 
 ---
 
