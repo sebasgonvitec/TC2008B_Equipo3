@@ -45,3 +45,7 @@ actividad_robots/Server/server.py
 Por último se corre la escena de Unity llamada "Warehouse"
 
 [Manual de instalación](https://github.com/sebasgonvitec/TC2008B_Equipo3/blob/main/reto/manual.mp4)
+
+---
+
+<span style="font-family:Monospace; font-size:4em;">Created with <3 by Andre, Akems, Karls & Sebas</span>
